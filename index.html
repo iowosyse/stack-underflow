@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Log In - sys-triage</title>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2 style="margin-bottom: 1.5rem;">sys-triage Portal</h2>
+            <div class="form-group">
+                    <input type="text" id="user" class="form-control" placeholder="Usuario" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="pass" class="form-control" placeholder="Contraseña" required>
+                </div>
+                <br> <!-- Salto de líneas -->
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; cursor: pointer; border:none;">INICIAR SESIÓN</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+
+            if (u === 'admin' && p === 'admin') {
+                window.location.href = 'admin.html';
+            } else if (u === 'root' && p === 'root') {
+                window.location.href = 'user.html';
+            } else {
+                alert("Credenciales incorrectas");
+            }
+        });
+    </script>
+</body>
+</html>
