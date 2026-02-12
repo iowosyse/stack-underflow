@@ -1,159 +1,238 @@
+/* ============================================================
+   ESTILO: "EDITORIAL GRIS / DARKER WIREFRAME"
+   Tonos grises medios, bordes definidos y elegancia sobria.
+   ============================================================ */
+
+/* 1. RESET Y BASE */
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    font-family: sans-serif; 
-    margin: 0;
+    font-family: Georgia, "Times New Roman", Times, serif;
+    /* Fondo general grisáceo (ya no blanco) */
+    background-color: #e0e0e0; 
+    color: #222222; /* Texto casi negro */
     height: 100vh;
     display: flex;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
-.login-container {
-    width: 100%;
-    height: 100vh;
-    display: flex;           
-    justify-content: center; 
-    align-items: center;     
-    background-color: #eeeeee; 
+/* Unificamos temas con ligeras variaciones */
+body.user-theme, body.admin-theme {
+    background-color: #e0e0e0;
+    color: #222;
 }
 
-.login-box {
-    background: white;
-    padding: 20px;
-    width: 300px;
-    border: 1px solid #000;
-}
-
-.login-box h2 {
-    text-align: center;
-    margin-top: 0;
-}
-
-
-body.user-theme {
-    background-color: white;
-    color: black;
-}
-body.user-theme .sidebar {
-    background-color: #f0f0f0; 
-    border-right: 1px solid #ccc;
-}
-
-body.user-theme a { color: #0000EE; }
-
-body.admin-theme {
-    background-color: #333; 
-    color: white;
-}
-body.admin-theme .sidebar {
-    background-color: #444; 
-    border-right: 1px solid #555;
-}
-body.admin-theme .card {
-    border: 1px solid #555;
-}
-body.admin-theme input, body.admin-theme button {
-    border: 1px solid #777;
-    background: #222;
-    color: white;
-}
-
-body.admin-theme a { color: #88CCFF; }
-
+/* =========================================
+   2. LAYOUT ESTRUCTURAL
+   ========================================= */
 .sidebar {
-    width: 200px; 
-    padding: 15px;
+    width: 240px;
+    padding: 25px;
+    /* Borde gris grafito sólido */
+    border-right: 1px solid #666666; 
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* Sidebar un poco más oscura que el contenido */
+    background-color: #d6d6d6; 
 }
 
 .main-content {
-    flex: 1; 
-    padding: 20px;
-    overflow-y: auto; 
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
 }
 
-.help {
+/* Login Centrado */
+.login-container {
+    width: 100%;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    align-self: center;
-    font-size: 14px;
+    background-color: #e0e0e0;
 }
 
+/* =========================================
+   3. ELEMENTOS VISUALES (Sobrios)
+   ========================================= */
+
+/* --- Títulos --- */
+h1, h2, h3 {
+    text-transform: none;
+    font-weight: normal;
+    color: #000;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    /* Línea divisora visible */
+    border-bottom: 1px solid #666666; 
+}
+
+/* --- Cajas y Tarjetas (Square & Defined) --- */
+.card, .login-box {
+    /* Fondo "blanco sucio" para que no brille tanto */
+    background: #f2f2f2; 
+    border: 1px solid #666666; /* Borde gris medio-oscuro */
+    padding: 25px;
+    border-radius: 0;          /* Cuadrado */
+    margin-bottom: 25px;
+}
+
+.login-box { width: 380px; text-align: center; }
+
+/* --- Navegación --- */
 .nav-link {
     display: block;
-    padding: 5px 0;
-    text-decoration: underline; 
-    cursor: pointer;
+    padding: 10px 0;
+    text-decoration: none;
+    color: #444; 
+    border-bottom: 1px solid #999; /* Línea separadora */
+    transition: all 0.2s;
 }
 
-.card {
-    border: 1px solid #ccc;
-    padding: 15px;
-    margin-bottom: 20px;
+.nav-link:hover, .nav-link.active {
+    color: #000;
+    border-bottom-color: #000; /* Se pone negro al pasar */
+    background: transparent;
+    font-style: italic; /* Toque editorial */
 }
 
-.grid-container {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-.grid-container .card {
-    flex: 1; 
-    min-width: 200px;
+/* Enlace de salir */
+a[href="index.html"] { 
+    color: #7a2e2e !important; /* Rojo ladrillo oscuro */
+    border-bottom: none;
+    font-weight: bold;
 }
 
-.ticket-table {
-    width: 100%;
-    border-collapse: collapse; 
-    margin-top: 10px;
-}
-.ticket-table th, .ticket-table td {
-    border: 1px solid #999;
-    padding: 8px;
-    text-align: left;
-}
+/* --- Formularios --- */
+.form-group { margin-bottom: 20px; }
 
-.form-group { margin-bottom: 10px; }
 .form-control {
     width: 100%;
-    padding: 5px;
-    font-size: 1rem;
+    padding: 10px;
+    border: 1px solid #666; /* Borde definido */
+    border-radius: 0;
+    background-color: #e8e8e8; /* Input gris claro */
+    font-family: Georgia, serif;
+    color: #111;
+}
+.form-control:focus {
+    outline: none;
+    background-color: #fff; /* Se ilumina al escribir */
+    border-color: #000;
 }
 
-.btn-primary {
-    padding: 5px 10px;
+/* --- Botones (Estilo Mecánico) --- */
+button, .btn-primary, summary.btn-primary {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #cccccc; /* Botón gris */
+    color: #111;
+    border: 1px solid #555;    
+    border-radius: 0;          
     cursor: pointer;
-    font-size: 1rem;
-    margin-top: 5px;
-}
-
-.btn-primary:hover {
-    background-color: #d2d2d2;
-    color: black;
-}
-
-.badge {
+    font-family: Georgia, serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
     font-weight: bold;
-    font-size: 0.8rem;
-    padding: 2px 4px;
-    border: 1px solid currentColor;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
 }
-.badge.open    { color: red; }
-.badge.pending { color: orange; }
-.badge.solved  { color: green; }
 
-body.admin-theme .badge.open { color: #ff6666; }
-body.admin-theme .badge.pending { color: #ffcc00; }
-body.admin-theme .badge.solved { color: #66ff66; }
-
-details > summary {
-  list-style: none;
+button:hover, .btn-primary:hover {
+    background-color: #b3b3b3; /* Más oscuro al hover */
+    border-color: #000;
 }
-details > summary::-webkit-details-marker {
-  display: none;
+
+/* Botón secundario */
+.btn-secondary {
+    display: inline-block;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #777;
+    color: #444;
+    border-radius: 0;
+    cursor: pointer;
+    font-family: Georgia, serif;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+.btn-secondary:hover { border-color: #000; color: #000; background: #ddd; }
+
+
+/* --- Tablas (Estilo Registro) --- */
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.ticket-table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #666; /* Línea gruesa */
+    font-weight: bold;
+    color: #111;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    background-color: #dcdcdc; /* Encabezado gris */
+}
+.ticket-table td {
+    padding: 12px;
+    border-bottom: 1px solid #999; /* Línea visible */
+    color: #333;
+}
+
+/* --- Badges (Etiquetas sobrias) --- */
+.badge {
+    padding: 3px 8px;
+    border-radius: 0;
+    font-size: 0.75rem;
+    border: 1px solid #555;
+    font-family: monospace;
+    text-transform: uppercase;
+    font-weight: bold;
+    background-color: #e0e0e0; /* Fondo gris base */
+    color: #333;
+}
+
+/* Variaciones muy sutiles de tono */
+.badge.open    { border-color: #8b3a4a; color: #8b3a4a; background: #e8d0d4; } /* Tono rojizo */
+.badge.pending { border-color: #9c7c36; color: #9c7c36; background: #e8dfc5; } /* Tono ocre */
+.badge.solved  { border-color: #436b42; color: #436b42; background: #d0e8d0; } /* Tono verdoso */
+
+/* Base de conocimiento */
+details {
+    padding: 15px;
+    border: 1px solid #666;
+    margin-bottom: 15px;
+    background: #f2f2f2;
+}
+summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+}
+summary:hover { color: #000; }
+.answer { margin-top: 15px; padding-left: 15px; border-left: 3px solid #999; color: #444; }
+
+/* Ajuste específico para Admin (Un poco más oscuro el sidebar) */
+body.admin-theme .sidebar { background-color: #cdcdcd; border-right-color: #555; }
+
+/* --- Arreglo para que los indicadores estén en fila --- */
+.grid-container {
+    display: flex;          /* Obliga a los hijos a ponerse en fila */
+    gap: 20px;              /* Espacio entre tarjetas */
+    margin-bottom: 25px;    /* Espacio debajo de la fila entera */
+}
+
+/* Hacemos que cada tarjeta dentro de la grilla crezca igual */
+.grid-container .card {
+    flex: 1;                /* Ocupan el mismo ancho equitativamente */
+    margin-bottom: 0;       /* Quitamos el margen inferior individual */
+    min-width: 200px;       /* Evita que se aplasten demasiado */
 }
