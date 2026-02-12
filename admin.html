@@ -1,11 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de administrador</title>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div></div>
+<body class="admin-theme">
+    
+    <nav class="sidebar">
+        <div>
+            <div class="logo" style="margin-bottom: 20px; font-weight: bold;">SYS_ADMIN</div>
+            <a href="#" class="nav-link active">Dashboard</a>
+            <a href="#" class="nav-link">Tickets Asignados <span class="badge open">3</span></a>
+            <a href="#" class="nav-link">Inventario</a>
+        </div>
+        <div>
+            <div class="nav-link" style="font-family: monospace;">user: admin</div>
+            <a href="index.html" class="nav-link" style="color: red;">logout()</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h1>Panel de Control</h1>
+            <input type="text" class="form-control" placeholder="Buscar ID..." style="width: 300px;">
+        </header>
+
+        <div class="grid-container">
+            <div class="card">
+                <p>EN COLA</p>
+                <h2>12</h2>
+            </div>
+            <div class="card">
+                <p>MIS TICKETS</p>
+                <h2>3</h2>
+            </div>
+            <div class="card">
+                <p>CRÍTICOS</p>
+                <h2 style="color: #ff6666;">1</h2>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Tickets Asignados</h3>
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Prioridad</th>
+                        <th>Usuario</th>
+                        <th>Asunto</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-ticket-list">
+                    <tr>
+                        <td class="ticket-id">#9044</td>
+                        <td><span class="badge open">ALTA</span></td>
+                        <td>user</td>
+                        <td>problema</td>
+                        <td><button class="btn-primary">HECHO</button></td>
+                    </tr>
+                    <tr>
+                        <td class="ticket-id">#9042</td>
+                        <td><span class="badge pending">MEDIA</span></td>
+                        <td>user</td>
+                        <td>problema</td>
+                        <td><button class="btn-primary">HECHO</button></td>
+                    </tr>
+                    <tr>
+                        <td class="ticket-id">#9040</td>
+                        <td><span class="badge solved">BAJA</span></td>
+                        <td>user</td>
+                        <td>problema</td>
+                        <td><button class="btn-primary">HECHO</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 </body>
 </html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Usuario</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+
+        .btn-secondary {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: transparent;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .btn-secondary:hover { background-color: #ffebee; }
+    </style>
+</head>
+<body class="user-theme">
+    
+    <nav class="sidebar">
+        <div>
+            <div class="logo" style="margin-bottom: 20px; font-weight: bold;">HelpDesk</div>
+            <a href="#" class="nav-link active">Mis Tickets</a>
+            <a href="#" class="nav-link">Base de Conocimiento</a>
+        </div>
+        <div>
+            <div class="nav-link">Perfil: <strong>Usuario</strong></div>
+            <a href="index.html" class="nav-link" style="color: red;">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>Mis Solicitudes</h1>
+        </header>
+
+        <div class="grid-container" style="display: block;"> <details id="ticket-form" style="margin-bottom: 20px;">
+                <summary class="btn-primary" style="margin-bottom: 10px; cursor: pointer; display: inline-block;">
+                    + Nuevo Ticket
+                </summary>
+                
+                <div class="card">
+                    <h3>Levantar Incidencia</h3>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Asunto del problema...">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control">
+                            <option>Hardware</option>
+                            <option>Software</option>
+                            <option>Redes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" placeholder="Descripción detallada..." style="height: 80px;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="alert('Ticket Enviado'); document.getElementById('ticket-form').removeAttribute('open');">
+                            Enviar Ticket
+                        </button>
+                        
+                        <button class="btn-secondary" onclick="document.getElementById('ticket-form').removeAttribute('open');">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </details>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="card" style="flex: 1; text-align:center; min-width: 200px;">
+                    <h3>Tickets Activos</h3>
+                    <div style="font-size: 3rem; font-weight: bold;">2</div>
+                </div>
+
+                <div class="card" style="flex: 2; min-width: 300px;">
+                    <h3>Historial Reciente</h3>
+                    <table class="ticket-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Asunto</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-ticket-list">
+                            <tr>
+                                <td class="ticket-id">#TK-1001</td>
+                                <td>Reporte de problema técnico</td>
+                                <td>Hoy</td>
+                                <td><span class="badge open">Abierto</span></td>
+                            </tr>
+                            <tr>
+                                <td class="ticket-id">#TK-1000</td>
+                                <td>Solicitud de servicio anterior</td>
+                                <td>Ayer</td>
+                                <td><span class="badge solved">Resuelto</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
