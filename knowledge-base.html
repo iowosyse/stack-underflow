@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Conocimiento</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        details {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        details:last-child {
+            border-bottom: none;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #3177c7;
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .answer {
+            margin-top: 10px;
+            color: #333;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="user-theme">
+    
+    <nav class="sidebar">
+        <div>
+            <div class="logo" style="margin-bottom: 20px; font-weight: bold;">HelpDesk</div>
+            <a href="user.html" class="nav-link">Mis Tickets</a>
+            <a href="#" class="nav-link active">Base de Conocimiento</a>
+        </div>
+        <div>
+            <div class="nav-link">Perfil: <strong>Usuario</strong></div>
+            <a href="index.html" class="nav-link" style="color: red;">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header style="margin-bottom: 20px;">
+            <h1>Ayuda y Tutoriales</h1>
+            <p style="color: #666;">Resuelve tus dudas rápidas sin esperar a un técnico.</p>
+        </header>
+
+        <div class="grid-container" style="display: block;">
+            
+            <div class="card">
+                <h3>Redes e Internet</h3>
+                
+                <details>
+                    <summary>¿Qué es una red y por qué no tengo sistema?</summary>
+                    <div class="answer">
+                        <p>Una red es simplemente un grupo de computadoras conectadas entre sí para compartir información (como carpetas compartidas o impresoras). Si "no tienes sistema", usualmente significa que tu computadora perdió la conexión con el servidor principal.</p>
+                        <p><strong>Solución rápida:</strong> Revisa si puedes entrar a páginas web normales (como Google). Si tampoco cargan, es tu internet.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>¿Qué cable necesito para conectarme a internet?</summary>
+                    <div class="answer">
+                        <p>El cable estándar se llama <strong>Ethernet (o RJ45)</strong>. Es parecido a un cable de teléfono fijo, pero la punta es más gruesa y suele ser de color azul, gris o amarillo.</p>
+                        <p>Debe conectarse en el puerto que tiene luces parpadeantes (verde/naranja) en la parte trasera de tu PC o lateral de tu laptop.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Diferencia entre WiFi y Cable</summary>
+                    <div class="answer">
+                        <p>El <strong>Cable</strong> es más rápido y estable, ideal para trabajar en la oficina. El <strong>WiFi</strong> es inalámbrico, pero puede fallar si estás lejos del módem o hay muchas paredes. Siempre preferimos que uses cable para evitar desconexiones.</p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="card">
+                <h3>Tutoriales Comunes</h3>
+
+                <details>
+                    <summary>¿Cómo instalar Google Chrome en una PC nueva?</summary>
+                    <div class="answer">
+                        <ol style="margin-left: 20px;">
+                            <li>Abre el navegador que viene por defecto (Edge en Windows o Safari en Mac).</li>
+                            <li>En la barra de direcciones escribe: <code>google.com/chrome</code></li>
+                            <li>Haz clic en el botón azul grande que dice <strong>"Descargar Chrome"</strong>.</li>
+                            <li>Se descargará un archivo. Haz clic sobre él para abrirlo.</li>
+                            <li>Espera a que termine la instalación automática. ¡Listo!</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Olvidé mi contraseña, ¿cómo la restablezco?</summary>
+                    <div class="answer">
+                        <p>No necesitas crear un ticket para esto. Sigue estos pasos:</p>
+                        <ol style="margin-left: 20px;">
+                            <li>En la pantalla de inicio de sesión, busca el enlace pequeño que dice <strong>"¿Olvidaste tu contraseña?"</strong>.</li>
+                            <li>Ingresa tu correo electrónico corporativo.</li>
+                            <li>Revisa tu bandeja de entrada (y la carpeta de Spam). Recibirás un enlace seguro.</li>
+                            <li>Haz clic en el enlace y escribe tu nueva contraseña dos veces.</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Mi impresora no imprime</summary>
+                    <div class="answer">
+                        <ul>
+                            <li>Revisa que la impresora esté encendida (luz verde).</li>
+                            <li>Revisa que tenga papel en la bandeja.</li>
+                            <li>Verifica que el cable USB esté bien conectado a tu computadora.</li>
+                            <li>Si nada funciona, intenta reiniciar la impresora (apagar y prender).</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>

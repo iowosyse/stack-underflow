@@ -75,6 +75,13 @@ body.admin-theme a { color: #88CCFF; }
     overflow-y: auto; 
 }
 
+.help {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    font-size: 14px;
+}
 
 .nav-link {
     display: block;
@@ -126,7 +133,7 @@ body.admin-theme a { color: #88CCFF; }
 }
 
 .btn-primary:hover {
-    background-color: #11f6db;
+    background-color: #179ea3;
     color: black;
 }
 
