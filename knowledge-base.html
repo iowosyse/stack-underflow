@@ -1,126 +1,172 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Base de Conocimiento</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        details {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        details:last-child {
-            border-bottom: none;
-        }
-        summary {
-            cursor: pointer;
-            font-weight: bold;
-            color: #3177c7;
-        }
-        summary:hover {
-            text-decoration: underline;
-        }
-        .answer {
-            margin-top: 10px;
-            color: #333;
-            line-height: 1.5;
-        }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="styles.css" type="text/css">
+    <style type="text/css">
+        .accordion-content { display: none; }
+        .accordion-header { cursor: pointer; }
+        /* Ajuste para certificados en línea */
+        .w3c-badges a { display: inline-block; margin: 0 5px; text-decoration: none; border: none; }
+        .w3c-badges img { border: 0; vertical-align: middle; }
     </style>
 </head>
 <body class="user-theme">
     
-    <nav class="sidebar">
-        <div>
-            <div class="logo" style="margin-bottom: 20px; font-weight: bold;">HelpDesk</div>
-            <a href="user.html" class="nav-link">Mis Tickets</a>
-            <a href="#" class="nav-link active">Base de Conocimiento</a>
-        </div>
-        <div>
-            <div class="nav-link">Perfil: <strong>Usuario</strong></div>
-            <a href="index.html" class="nav-link" style="color: red;">Cerrar Sesión</a>
-        </div>
-    </nav>
-
-    <main class="main-content">
-        <header style="margin-bottom: 20px;">
-            <h1>Ayuda y Tutoriales</h1>
-            <p style="color: #666;">Resuelve tus dudas rápidas sin esperar a un técnico.</p>
-        </header>
-
-        <div class="grid-container" style="display: block;">
+    <div class="d-flex flex-column vh-100" id="wrapper">
+        <div class="d-flex flex-grow-1 overflow-hidden">
             
-            <div class="card">
-                <h3>Redes e Internet</h3>
-                
-                <details>
-                    <summary>¿Qué es una red y por qué no tengo sistema?</summary>
-                    <div class="answer">
-                        <p>Una red es simplemente un grupo de computadoras conectadas entre sí para compartir información (como carpetas compartidas o impresoras). Si "no tienes sistema", usualmente significa que tu computadora perdió la conexión con el servidor principal.</p>
-                        <p><strong>Solución rápida:</strong> Revisa si puedes entrar a páginas web normales (como Google). Si tampoco cargan, es tu internet.</p>
+            <div class="sidebar border-end bg-light p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="logo h4 fw-bold mb-4 px-2 text-primary-emphasis">HelpDesk</div>
+                    <div class="list-group list-group-flush bg-transparent">
+                        <a href="user.html" class="list-group-item list-group-item-action bg-transparent">Mis Tickets</a>
+                        <a href="knowledge-base.html" class="list-group-item list-group-item-action bg-transparent active fw-bold">Base de Conocimiento</a>
                     </div>
-                </details>
-
-                <details>
-                    <summary>¿Qué cable necesito para conectarme a internet?</summary>
-                    <div class="answer">
-                        <p>El cable estándar se llama <strong>Ethernet (o RJ45)</strong>. Es parecido a un cable de teléfono fijo, pero la punta es más gruesa y suele ser de color azul, gris o amarillo.</p>
-                        <p>Debe conectarse en el puerto que tiene luces parpadeantes (verde/naranja) en la parte trasera de tu PC o lateral de tu laptop.</p>
-                    </div>
-                </details>
-
-                <details>
-                    <summary>Diferencia entre WiFi y Cable</summary>
-                    <div class="answer">
-                        <p>El <strong>Cable</strong> es más rápido y estable, ideal para trabajar en la oficina. El <strong>WiFi</strong> es inalámbrico, pero puede fallar si estás lejos del módem o hay muchas paredes. Siempre preferimos que uses cable para evitar desconexiones.</p>
-                    </div>
-                </details>
+                </div>
+                <div class="px-2">
+                    <div class="small mb-2">Perfil: <strong>Usuario</strong></div>
+                    <a href="index.html" class="text-danger text-decoration-none fw-bold">Cerrar Sesion</a>
+                </div>
             </div>
 
-            <div class="card">
-                <h3>Tutoriales Comunes</h3>
-
-                <details>
-                    <summary>¿Cómo instalar Google Chrome en una PC nueva?</summary>
-                    <div class="answer">
-                        <ol style="margin-left: 20px;">
-                            <li>Abre el navegador que viene por defecto (Edge en Windows o Safari en Mac).</li>
-                            <li>En la barra de direcciones escribe: <code>google.com/chrome</code></li>
-                            <li>Haz clic en el botón azul grande que dice <strong>"Descargar Chrome"</strong>.</li>
-                            <li>Se descargará un archivo. Haz clic sobre él para abrirlo.</li>
-                            <li>Espera a que termine la instalación automática. ¡Listo!</li>
-                        </ol>
+            <div class="container-fluid p-0 d-flex flex-column main-content overflow-auto">
+                <div class="p-5 flex-grow-1">
+                    
+                    <div class="mb-4 pb-2 border-bottom border-secondary-subtle">
+                        <h1 class="h3 m-0">Ayuda y Tutoriales</h1>
+                        <p class="text-muted mt-2">Resuelve tus dudas r&aacute;pidas sin esperar a un t&eacute;cnico.</p>
                     </div>
-                </details>
 
-                <details>
-                    <summary>Olvidé mi contraseña, ¿cómo la restablezco?</summary>
-                    <div class="answer">
-                        <p>No necesitas crear un ticket para esto. Sigue estos pasos:</p>
-                        <ol style="margin-left: 20px;">
-                            <li>En la pantalla de inicio de sesión, busca el enlace pequeño que dice <strong>"¿Olvidaste tu contraseña?"</strong>.</li>
-                            <li>Ingresa tu correo electrónico corporativo.</li>
-                            <li>Revisa tu bandeja de entrada (y la carpeta de Spam). Recibirás un enlace seguro.</li>
-                            <li>Haz clic en el enlace y escribe tu nueva contraseña dos veces.</li>
-                        </ol>
-                    </div>
-                </details>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            
+                            <div class="card rounded-0 border-secondary-subtle shadow-sm mb-4">
+                                <div class="card-header bg-light fw-bold rounded-0">
+                                    Redes e Internet
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans1')">
+                                            &#9656; &iquest;Qu&eacute; es una red y por qu&eacute; no tengo sistema?
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans1">
+                                            <p>Una red es simplemente un grupo de computadoras conectadas entre s&iacute; para compartir informaci&oacute;n (como carpetas compartidas o impresoras). Si "no tienes sistema", usualmente significa que tu computadora perdi&oacute; la conexi&oacute;n con el servidor principal.</p>
+                                            <p><strong>Soluci&oacute;n r&aacute;pida:</strong> Revisa si puedes entrar a p&aacute;ginas web normales (como Google). Si tampoco cargan, es tu internet.</p>
+                                        </div>
+                                    </div>
 
-                <details>
-                    <summary>Mi impresora no imprime</summary>
-                    <div class="answer">
-                        <ul>
-                            <li>Revisa que la impresora esté encendida (luz verde).</li>
-                            <li>Revisa que tenga papel en la bandeja.</li>
-                            <li>Verifica que el cable USB esté bien conectado a tu computadora.</li>
-                            <li>Si nada funciona, intenta reiniciar la impresora (apagar y prender).</li>
-                        </ul>
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans2')">
+                                            &#9656; &iquest;Qu&eacute; cable necesito para conectarme a internet?
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans2">
+                                            <p>El cable est&aacute;ndar se llama <strong>Ethernet (o RJ45)</strong>. Es parecido a un cable de tel&eacute;fono fijo, pero la punta es m&aacute;s gruesa y suele ser de color azul, gris o amarillo.</p>
+                                            <p>Debe conectarse en el puerto que tiene luces parpadeantes (verde/naranja) en la parte trasera de tu PC o lateral de tu laptop.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans3')">
+                                            &#9656; Diferencia entre WiFi y Cable
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans3">
+                                            <p>El <strong>Cable</strong> es m&aacute;s r&aacute;pido y estable, ideal para trabajar en la oficina. El <strong>WiFi</strong> es inal&aacute;mbrico, pero puede fallar si est&aacute;s lejos del m&oacute;dem o hay muchas paredes. Siempre preferimos que uses cable para evitar desconexiones.</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card rounded-0 border-secondary-subtle shadow-sm">
+                                <div class="card-header bg-light fw-bold rounded-0">
+                                    Tutoriales Comunes
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans4')">
+                                            &#9656; &iquest;C&oacute;mo instalar Google Chrome en una PC nueva?
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans4">
+                                            <ol style="margin-left: 20px;">
+                                                <li>Abre el navegador que viene por defecto (Edge en Windows o Safari en Mac).</li>
+                                                <li>En la barra de direcciones escribe: <code>google.com/chrome</code></li>
+                                                <li>Haz clic en el bot&oacute;n azul grande que dice <strong>"Descargar Chrome"</strong>.</li>
+                                                <li>Se descargar&aacute; un archivo. Haz clic sobre &eacute;l para abrirlo.</li>
+                                                <li>Espera a que termine la instalaci&oacute;n autom&aacute;tica. &iexcl;Listo!</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans5')">
+                                            &#9656; Olvid&eacute; mi contrase&ntilde;a, &iquest;c&oacute;mo la restablezco?
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans5">
+                                            <p>No necesitas crear un ticket para esto. Sigue estos pasos:</p>
+                                            <ol style="margin-left: 20px;">
+                                                <li>En la pantalla de inicio de sesi&oacute;n, busca el enlace peque&ntilde;o que dice <strong>"&iquest;Olvidaste tu contrase&ntilde;a?"</strong>.</li>
+                                                <li>Ingresa tu correo electr&oacute;nico corporativo.</li>
+                                                <li>Revisa tu bandeja de entrada (y la carpeta de Spam). Recibir&aacute;s un enlace seguro.</li>
+                                                <li>Haz clic en el enlace y escribe tu nueva contrase&ntilde;a dos veces.</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 p-2 border-bottom border-light-subtle">
+                                        <div class="fw-bold text-primary accordion-header" onclick="toggleAnswer('ans6')">
+                                            &#9656; Mi impresora no imprime
+                                        </div>
+                                        <div class="mt-2 text-secondary px-3 accordion-content" id="ans6">
+                                            <ul>
+                                                <li>Revisa que la impresora est&eacute; encendida (luz verde).</li>
+                                                <li>Revisa que tenga papel en la bandeja.</li>
+                                                <li>Verifica que el cable USB est&eacute; bien conectado a tu computadora.</li>
+                                                <li>Si nada funciona, intenta reiniciar la impresora (apagar y prender).</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                </details>
+                </div>
+
+                <div class="py-3 text-center w-100 border-top border-secondary-subtle bg-white">
+                    <div class="container small text-muted">
+                        <p class="m-0">&copy; 2026 HelpDesk System. Todos los derechos reservados.</p>
+                        
+                        <div class="mt-2 w3c-badges">
+                            <a href="http://validator.w3.org/check?uri=referer">
+                                <img src="http://www.w3.org/Icons/valid-html401" alt="Valid HTML 4.01 Transitional" height="31" width="88">
+                            </a>
+                            
+                            <a href="http://jigsaw.w3.org/css-validator/check/referer">
+                                <img src="http://jigsaw.w3.org/css-validator/images/vcss-blue" alt="CSS Valido!" height="31" width="88">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-
         </div>
-    </main>
+    </div>
+
+    <script type="text/javascript">
+        function toggleAnswer(id) {
+            var el = document.getElementById(id);
+            if (el.style.display === "block") {
+                el.style.display = "none";
+            } else {
+                el.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>

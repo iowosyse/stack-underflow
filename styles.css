@@ -76,3 +76,15 @@ summary {
 summary::-webkit-details-marker {
     display: none;
 }
+
+.w3c-badges a {
+    display: inline-block; 
+    margin: 0 5px;      
+    text-decoration: none;
+    border: none;
+}
+
+.w3c-badges img {
+    border: 0;
+    vertical-align: middle;
+}
