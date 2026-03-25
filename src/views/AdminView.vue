@@ -1,72 +1,41 @@
 <template>
-  <div class="admin-theme d-flex flex-column vh-100" id="wrapper">
+  <div class="d-flex flex-column vh-100 bg-light" id="wrapper">
     <div class="d-flex flex-grow-1 overflow-hidden">
-      <div class="sidebar border-end bg-secondary-subtle p-3 d-flex flex-column justify-content-between">
+      <div class="sidebar p-4 d-flex flex-column justify-content-between" style="width: 280px;">
         <div>
-          <div class="logo h4 fw-bold mb-4 px-2">SYS_ADMIN</div>
+          <div class="logo h4 fw-bold mb-5 text-primary">SYS_ADMIN</div>
           <div class="list-group list-group-flush bg-transparent">
-            <RouterLink to="/admin" class="list-group-item list-group-item-action bg-transparent active fw-bold">Dashboard</RouterLink>
-            <a href="#" class="list-group-item list-group-item-action bg-transparent">Usuarios</a>
-            <a href="#" class="list-group-item list-group-item-action bg-transparent">Configuración</a>
+            <button @click="currentTab = 'dashboard'" :class="['list-group-item list-group-item-action bg-transparent text-start', { 'active': currentTab === 'dashboard' }]">Mis Tickets Asignados</button>
+            <button @click="currentTab = 'usuarios'" :class="['list-group-item list-group-item-action bg-transparent text-start', { 'active': currentTab === 'usuarios' }]">Directorio y Tickets</button>
+            <button @click="currentTab = 'disponibles'" :class="['list-group-item list-group-item-action bg-transparent text-start', { 'active': currentTab === 'disponibles' }]">Tickets sin Asignar</button>
           </div>
         </div>
-        <div class="px-2">
-          <div class="small font-monospace mb-2">user: admin</div>
-          <RouterLink to="/" class="text-danger text-decoration-none fw-bold">logout()</RouterLink>
+        <div>
+          <div class="small text-muted mb-2 text-capitalize">Admin: {{ store.currentUser?.fullName }}</div>
+          <button @click="handleLogout" class="btn btn-outline-danger w-100">Cerrar Sesión</button>
         </div>
       </div>
 
-      <div class="container-fluid p-0 d-flex flex-column main-content overflow-auto">
-        <div class="p-5 flex-grow-1">
-          <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-dark">
-            <h1 class="h3 m-0">Panel de Control</h1>
-            <form @submit.prevent class="w-25">
-              <label for="search" class="visually-hidden">Buscar</label>
-              <input type="text" id="search" class="form-control rounded-0 border-secondary" placeholder="Buscar ID...">
-            </form>
-          </div>
+      <div class="container-fluid p-5 d-flex flex-column overflow-auto">
 
-          <div class="row g-4 mb-5">
-            <div class="col-md-4">
-              <div class="card h-100 p-3 rounded-0 border-secondary">
-                <p class="text-muted small fw-bold mb-1">EN COLA</p>
-                <h2 class="display-6 fw-bold m-0">12</h2>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card h-100 p-3 rounded-0 border-secondary">
-                <p class="text-muted small fw-bold mb-1">MIS TICKETS</p>
-                <h2 class="display-6 fw-bold m-0 text-info">3</h2>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="card h-100 p-3 rounded-0 border-secondary">
-                <p class="text-muted small fw-bold mb-1">CRÍTICOS</p>
-                <h2 class="display-6 fw-bold m-0 text-danger">1</h2>
-              </div>
-            </div>
-          </div>
-
-          <div class="card rounded-0 border-secondary bg-white">
-            <div class="card-header bg-secondary-subtle border-bottom border-secondary fw-bold rounded-0">Tickets Asignados</div>
+        <div v-if="currentTab === 'dashboard'">
+          <h2 class="h3 mb-4 fw-bold">Mis Tickets Asignados</h2>
+          <div class="card bg-white p-3">
             <div class="card-body p-0">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th class="ps-4">ID</th>
-                    <th>Prioridad</th>
-                    <th>Usuario</th>
-                    <th>Asunto</th>
-                    <th>Acción</th>
-                  </tr>
+              <table class="table table-borderless align-middle mb-0">
+                <thead class="border-bottom">
+                  <tr><th class="ps-3 text-muted">ID</th><th class="text-muted">Prioridad</th><th class="text-muted">Usuario</th><th class="text-muted">Asunto</th><th class="text-muted">Acción</th></tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td class="ps-4 fw-bold text-muted">#9044</td>
-                    <td><span class="badge rounded-0 bg-danger-subtle text-danger border border-danger">ALTA</span></td>
-                    <td>user</td>
-                    <td>Error crítico</td>
-                    <td><button class="btn btn-sm btn-outline-dark rounded-0">HECHO</button></td>
+                  <tr v-for="t in myAssignedTickets" :key="t.id" class="border-bottom">
+                    <td class="ps-3 fw-bold">{{ t.id }}</td>
+                    <td><span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">{{ t.priority }}</span></td>
+                    <td class="text-capitalize">{{ t.author }}</td>
+                    <td>{{ t.subject }}</td>
+                    <td><button @click="cerrarTicket(t)" class="btn btn-sm btn-dark px-3 rounded-pill">Resolver</button></td>
+                  </tr>
+                  <tr v-if="myAssignedTickets.length === 0">
+                    <td colspan="5" class="text-center py-5 text-muted">No tienes tickets asignados en cola. ¡Buen trabajo!</td>
                   </tr>
                 </tbody>
               </table>
@@ -74,16 +43,105 @@
           </div>
         </div>
 
-        <div class="py-3 text-center w-100 border-top border-secondary bg-secondary-subtle">
-          <div class="container small text-muted">
-            <p class="m-0">&copy; 2026 SysAdmin Console.</p>
-            <div class="mt-2 w3c-badges">
-              <a href="https://validator.w3.org/nu/?doc=referer"><img src="https://www.w3.org/Icons/valid-html5" alt="Valid HTML5" height="31" width="88"></a>
-              <a href="https://jigsaw.w3.org/css-validator/check/referer"><img src="https://jigsaw.w3.org/css-validator/images/vcss-blue" alt="CSS Valido!" height="31" width="88"></a>
+        <div v-if="currentTab === 'usuarios'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 m-0 fw-bold">Directorio de Usuarios</h2>
+            <RouterLink to="/admin/nuevo-usuario" class="btn btn-primary shadow-sm">+ Nuevo Usuario</RouterLink>
+          </div>
+          <div class="row g-4">
+            <div class="col-4">
+              <div class="card p-2">
+                <div class="list-group list-group-flush" style="max-height: 60vh; overflow-y: auto;">
+                  <button v-for="u in store.users" :key="u.fullName" @click="selectedUser = u" :class="['list-group-item list-group-item-action text-capitalize', { 'active': selectedUser?.fullName === u.fullName }]">
+                    {{ u.fullName }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-8">
+              <div v-if="selectedUser" class="card p-3">
+                <div class="card-header bg-transparent border-0 pt-2 pb-3 fw-bold text-capitalize fs-5">Historial de {{ selectedUser.fullName }}</div>
+                <div class="card-body p-0">
+                   <table class="table table-borderless align-middle mb-0">
+                      <thead class="border-bottom"><tr><th class="ps-3 text-muted">ID</th><th class="text-muted">Asunto</th><th class="text-muted">Estado</th></tr></thead>
+                      <tbody>
+                        <tr v-for="t in userTickets(selectedUser.fullName)" :key="t.id" class="border-bottom">
+                          <td class="ps-3">{{ t.id }}</td><td>{{ t.subject }}</td>
+                          <td><span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">{{ t.status }}</span></td>
+                        </tr>
+                        <tr v-if="userTickets(selectedUser.fullName).length === 0">
+                          <td colspan="3" class="text-center py-5 text-muted">Este usuario no ha levantado tickets.</td>
+                        </tr>
+                      </tbody>
+                   </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <div v-if="currentTab === 'disponibles'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 m-0 fw-bold">Tickets Sin Asignar ({{ unassignedTickets.length }}/10)</h2>
+            <select class="form-select w-25 shadow-sm" v-model="priorityFilter">
+              <option value="todas">Todas las prioridades</option>
+              <option value="urgente">Urgente</option>
+              <option value="alta">Alta</option>
+              <option value="moderada">Moderada</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+          
+          <div class="card p-3">
+            <table class="table table-borderless align-middle mb-0">
+              <thead class="border-bottom">
+                <tr><th class="ps-3 text-muted">ID</th><th class="text-muted">Prioridad</th><th class="text-muted">Autor</th><th class="text-muted">Asunto</th><th class="text-muted">Fecha</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="t in filteredUnassigned" :key="t.id" class="border-bottom">
+                  <td class="ps-3 fw-bold">{{ t.id }}</td>
+                  <td><span class="badge bg-secondary px-3 py-2 rounded-pill">{{ t.priority }}</span></td>
+                  <td class="text-capitalize">{{ t.author }}</td>
+                  <td>{{ t.subject }}</td>
+                  <td class="small text-muted">{{ t.createdAt.toLocaleTimeString() }}</td>
+                </tr>
+                <tr v-if="filteredUnassigned.length === 0">
+                   <td colspan="5" class="text-center py-5 text-muted">No hay tickets pendientes actualmente.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { store } from '../store'
+
+const router = useRouter()
+const currentTab = ref('dashboard')
+const selectedUser = ref(null)
+const priorityFilter = ref('todas')
+
+const myAssignedTickets = computed(() => store.tickets.filter(t => t.assignedTo === store.currentUser?.fullName && t.status !== 'cerrado'))
+const unassignedTickets = computed(() => store.tickets.filter(t => t.status === 'disponible'))
+
+const filteredUnassigned = computed(() => {
+  let list = unassignedTickets.value
+  if (priorityFilter.value !== 'todas') list = list.filter(t => t.priority === priorityFilter.value)
+  return list.sort((a, b) => a.createdAt - b.createdAt)
+})
+
+const userTickets = (authorName) => store.tickets.filter(t => t.author === authorName)
+const cerrarTicket = (ticket) => { ticket.status = 'cerrado' }
+
+const handleLogout = () => {
+  store.logout()
+  router.push('/')
+}
+</script>
