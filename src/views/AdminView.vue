@@ -1,0 +1,89 @@
+<template>
+  <div class="admin-theme d-flex flex-column vh-100" id="wrapper">
+    <div class="d-flex flex-grow-1 overflow-hidden">
+      <div class="sidebar border-end bg-secondary-subtle p-3 d-flex flex-column justify-content-between">
+        <div>
+          <div class="logo h4 fw-bold mb-4 px-2">SYS_ADMIN</div>
+          <div class="list-group list-group-flush bg-transparent">
+            <RouterLink to="/admin" class="list-group-item list-group-item-action bg-transparent active fw-bold">Dashboard</RouterLink>
+            <a href="#" class="list-group-item list-group-item-action bg-transparent">Usuarios</a>
+            <a href="#" class="list-group-item list-group-item-action bg-transparent">Configuración</a>
+          </div>
+        </div>
+        <div class="px-2">
+          <div class="small font-monospace mb-2">user: admin</div>
+          <RouterLink to="/" class="text-danger text-decoration-none fw-bold">logout()</RouterLink>
+        </div>
+      </div>
+
+      <div class="container-fluid p-0 d-flex flex-column main-content overflow-auto">
+        <div class="p-5 flex-grow-1">
+          <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-dark">
+            <h1 class="h3 m-0">Panel de Control</h1>
+            <form @submit.prevent class="w-25">
+              <label for="search" class="visually-hidden">Buscar</label>
+              <input type="text" id="search" class="form-control rounded-0 border-secondary" placeholder="Buscar ID...">
+            </form>
+          </div>
+
+          <div class="row g-4 mb-5">
+            <div class="col-md-4">
+              <div class="card h-100 p-3 rounded-0 border-secondary">
+                <p class="text-muted small fw-bold mb-1">EN COLA</p>
+                <h2 class="display-6 fw-bold m-0">12</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 p-3 rounded-0 border-secondary">
+                <p class="text-muted small fw-bold mb-1">MIS TICKETS</p>
+                <h2 class="display-6 fw-bold m-0 text-info">3</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card h-100 p-3 rounded-0 border-secondary">
+                <p class="text-muted small fw-bold mb-1">CRÍTICOS</p>
+                <h2 class="display-6 fw-bold m-0 text-danger">1</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="card rounded-0 border-secondary bg-white">
+            <div class="card-header bg-secondary-subtle border-bottom border-secondary fw-bold rounded-0">Tickets Asignados</div>
+            <div class="card-body p-0">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Prioridad</th>
+                    <th>Usuario</th>
+                    <th>Asunto</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="ps-4 fw-bold text-muted">#9044</td>
+                    <td><span class="badge rounded-0 bg-danger-subtle text-danger border border-danger">ALTA</span></td>
+                    <td>user</td>
+                    <td>Error crítico</td>
+                    <td><button class="btn btn-sm btn-outline-dark rounded-0">HECHO</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="py-3 text-center w-100 border-top border-secondary bg-secondary-subtle">
+          <div class="container small text-muted">
+            <p class="m-0">&copy; 2026 SysAdmin Console.</p>
+            <div class="mt-2 w3c-badges">
+              <a href="https://validator.w3.org/nu/?doc=referer"><img src="https://www.w3.org/Icons/valid-html5" alt="Valid HTML5" height="31" width="88"></a>
+              <a href="https://jigsaw.w3.org/css-validator/check/referer"><img src="https://jigsaw.w3.org/css-validator/images/vcss-blue" alt="CSS Valido!" height="31" width="88"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
