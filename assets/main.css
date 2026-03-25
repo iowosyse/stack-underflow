@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  background-color: #f4f6f9;
+  color: #2c3e50;
+}
+
+/* Tarjetas y Contenedores Modernos */
+.card {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-box {
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  border: 1px solid #eef0f3;
+}
+
+/* Menú Lateral (Sidebar) */
+.sidebar {
+  background-color: #ffffff !important;
+  border-right: 1px solid #eef0f3 !important;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+}
+
+.list-group-item {
+  border: none !important;
+  padding: 12px 20px;
+  border-radius: 8px !important;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa !important;
+}
+
+.list-group-item.active {
+  background-color: #f0f4f8 !important;
+  color: #0d6efd !important;
+  border-left: 4px solid #0d6efd !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+/* Inputs y Botones */
+.form-control, .form-select {
+  border-radius: 8px !important;
+  border: 1px solid #dee2e6;
+  padding: 10px 15px;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.btn {
+  border-radius: 8px !important;
+  font-weight: 500;
+  padding: 10px 20px;
+}
