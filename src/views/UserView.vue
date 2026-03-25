@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column vh-100 bg-light" id="wrapper">
     <div class="d-flex flex-grow-1 overflow-hidden">
-      <div class="sidebar p-4 d-flex flex-column justify-content-between" style="width: 280px;">
+      <div class="sidebar p-4 d-flex flex-column justify-content-between flex-shrink-0" style="width: 280px;">
         <div>
           <div class="logo h4 fw-bold mb-5 text-primary">stack-underflow</div>
           <div class="list-group list-group-flush bg-transparent">
@@ -63,7 +63,11 @@
                 <tr v-for="t in myTickets" :key="t.id" class="border-bottom">
                   <td class="ps-3 fw-bold">{{ t.id }}</td>
                   <td>{{ t.subject }}</td>
-                  <td><span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">{{ t.status }}</span></td>
+                  <td>
+                    <span :class="['badge px-3 py-2 rounded-pill', t.status === 'hecho' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary']">
+                      {{ t.status }}
+                    </span>
+                  </td>
                 </tr>
                 <tr v-if="myTickets.length === 0">
                     <td colspan="3" class="text-center py-5 text-muted">No has levantado tickets recientemente.</td>
@@ -87,12 +91,16 @@ const subject = ref('')
 const category = ref('Hardware')
 const description = ref('')
 
-const activeTicketsCount = computed(() => store.tickets.filter(t => t.author === store.currentUser?.fullName && t.status !== 'cerrado').length)
-const myTickets = computed(() => store.tickets.filter(t => t.author === store.currentUser?.fullName))
+// Cuenta únicamente los activos de la tabla principal
+const activeTicketsCount = computed(() => store.tickets.filter(t => t.author === store.currentUser?.fullName).length)
+
+// Combina el arreglo activo con el cerrado para que el usuario pueda ver todo lo que ha pedido históricamente
+const myTickets = computed(() => {
+    return [...store.tickets, ...store.closedTickets].filter(t => t.author === store.currentUser?.fullName)
+})
 
 const submitTicket = () => {
   if(!subject.value || !description.value) return alert("Por favor, llena todos los campos.")
-  // Se envía sin prioridad manual, el store lo asignará como 'baja'
   store.addTicket(subject.value, category.value, description.value)
   subject.value = ''
   description.value = ''

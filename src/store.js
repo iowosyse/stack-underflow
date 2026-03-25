@@ -24,7 +24,9 @@ export const store = reactive({
   currentUser: null,
   admins: rawAdmins.map(name => parseUser(name, 'admin')),
   users: rawUsers.map(name => parseUser(name, 'user')),
+  
   tickets: [],
+  closedTickets: [], 
 
   login(user, pass) {
     const u = normalize(user)
@@ -38,13 +40,13 @@ export const store = reactive({
 
   logout() { this.currentUser = null },
 
-  // La prioridad ahora se asigna internamente, no la pide como parámetro
   addTicket(subject, category, description) {
+    const totalTicketsCount = this.tickets.length + this.closedTickets.length;
     const newTicket = {
-      id: '#TK-' + (1000 + this.tickets.length + 1),
+      id: '#TK-' + (1000 + totalTicketsCount + 1),
       subject, 
       category, 
-      priority: 'baja', // <-- Prioridad automática por defecto
+      priority: 'baja',
       description,
       status: 'disponible',
       author: this.currentUser.fullName,
@@ -60,6 +62,24 @@ export const store = reactive({
     else this.users.push(parseUser(fullName, 'user'))
   },
 
+  acceptTicket(ticketId) {
+    const ticket = this.tickets.find(t => t.id === ticketId);
+    if (ticket && this.currentUser?.role === 'admin') {
+      ticket.assignedTo = this.currentUser.fullName;
+      ticket.status = 'asignado';
+    }
+  },
+
+  closeTicket(ticketId) {
+    const index = this.tickets.findIndex(t => t.id === ticketId);
+    if (index !== -1) {
+        const ticket = this.tickets[index];
+        ticket.status = 'hecho';
+        this.closedTickets.push(ticket);
+        this.tickets.splice(index, 1);
+    }
+  },
+
   checkAssignments() {
     const disponibles = this.tickets.filter(t => t.status === 'disponible')
     if (disponibles.length >= 10) {
@@ -69,7 +89,7 @@ export const store = reactive({
       let maxDisponibilidad = -1; 
 
       this.admins.forEach(admin => {
-        const attending = this.tickets.filter(t => t.assignedTo === admin.fullName && t.status !== 'cerrado')
+        const attending = this.tickets.filter(t => t.assignedTo === admin.fullName)
         const cantidadTickets = attending.length;
         let disponibilidad = 0;
         
