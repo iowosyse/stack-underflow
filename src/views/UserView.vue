@@ -57,7 +57,12 @@
                   <textarea class="form-control" rows="3" v-model="description"
                             placeholder="Describe el problema con el mayor detalle posible…"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill">
+
+                <div v-if="ticketSuccess" class="text-accent fw-bold small text-center mb-3" style="font-family: 'Inter', sans-serif;">
+                  ✔ Ticket levantado y enviado a soporte correctamente.
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill" :disabled="!isFormValid">
                   Enviar Ticket
                 </button>
               </form>
@@ -121,6 +126,7 @@ const router      = useRouter()
 const subject     = ref('')
 const category    = ref('Hardware')
 const description = ref('')
+const ticketSuccess = ref(false)
 const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
@@ -132,11 +138,17 @@ const myTickets = computed(() =>
   [...store.tickets, ...store.closedTickets].filter(t => t.author === store.currentUser?.fullName)
 )
 
+// Validación: El botón se activa solo si hay texto en ambos campos
+const isFormValid = computed(() => subject.value.trim() !== '' && description.value.trim() !== '')
+
 const submitTicket = () => {
-  if (!subject.value || !description.value) return alert("Llena todos los campos.")
   store.addTicket(subject.value, category.value, description.value)
   subject.value     = ''
   description.value = ''
+  
+  // Mostrar mensaje de éxito temporalmente
+  ticketSuccess.value = true
+  setTimeout(() => ticketSuccess.value = false, 3500)
 }
 
 const logout = () => { store.logout(); router.push('/') }
