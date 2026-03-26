@@ -2,17 +2,15 @@
   <div class="d-flex flex-column vh-100 user-bg" id="wrapper">
     <div class="d-flex flex-grow-1 overflow-hidden p-3 gap-3">
 
-      <!-- Sidebar -->
       <div class="glass-user p-4 d-flex flex-column justify-content-between flex-shrink-0" style="width: 280px;">
         <div>
           <div class="logo mb-5 text-accent">stack-underflow</div>
           <nav class="list-group list-group-flush">
-            <RouterLink to="/user"           class="list-group-item">Mis Tickets</RouterLink>
+            <RouterLink to="/user"           class="list-group-item active">Mis Tickets</RouterLink>
             <RouterLink to="/knowledge-base" class="list-group-item">Base de Conocimiento</RouterLink>
           </nav>
         </div>
 
-        <!-- Theme Toggle -->
         <div>
           <button @click="toggle" class="theme-toggle mb-3">
             <span class="theme-toggle-icon">{{ isDark ? '☀' : '☾' }}</span>
@@ -21,20 +19,17 @@
           <div class="small mb-2 opacity-55 text-capitalize">
             Perfil: <strong>{{ store.currentUser?.fullName }}</strong>
           </div>
-          <button @click="logout" class="btn btn-outline-danger w-100 rounded-pill">
+          <button @click="logout" class="btn btn-outline-danger w-100">
             Cerrar Sesión
           </button>
         </div>
       </div>
 
-      <!-- Contenido principal -->
       <div class="glass-user container-fluid p-5 d-flex flex-column overflow-auto w-100">
 
         <h2 class="h3 mb-4 fw-bold">Mis Solicitudes</h2>
 
         <div class="row g-4 mb-4">
-
-          <!-- Formulario de ticket -->
           <div class="col-md-8">
             <div class="panel-inner p-4 h-100">
               <h5 class="fw-bold mb-4 opacity-55">Levantar Incidencia</h5>
@@ -62,14 +57,13 @@
                   ✔ Ticket levantado y enviado a soporte correctamente.
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill" :disabled="!isFormValid">
+                <button type="submit" class="btn btn-primary w-100 py-2" :disabled="!isFormValid">
                   Enviar Ticket
                 </button>
               </form>
             </div>
           </div>
 
-          <!-- Contador de tickets -->
           <div class="col-md-4">
             <div class="stat-panel p-4 h-100 d-flex align-items-center justify-content-center text-center">
               <div>
@@ -78,12 +72,10 @@
               </div>
             </div>
           </div>
-
         </div>
 
-        <!-- Historial -->
         <div class="panel-inner p-4">
-          <h5 class="fw-bold mb-3 opacity-55">Historial de Reportes</h5>
+          <h5 class="fw-bold mb-3 opacity-55">Historial de Reportes <span class="small fw-normal text-lowercase">(Clic para expandir)</span></h5>
           <table class="table table-borderless align-middle mb-0">
             <thead>
               <tr>
@@ -93,15 +85,28 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="t in myTickets" :key="t.id">
-                <td class="ps-3 col-id">{{ t.id }}</td>
-                <td>{{ t.subject }}</td>
-                <td>
-                  <span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">
-                    {{ t.status }}
-                  </span>
-                </td>
-              </tr>
+              <template v-for="t in myTickets" :key="t.id">
+                <tr @click="toggleTicket(t.id)" style="cursor: pointer;">
+                  <td class="ps-3 col-id">{{ t.id }}</td>
+                  <td>{{ t.subject }}</td>
+                  <td>
+                    <span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">
+                      {{ t.status }}
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="expandedTicket === t.id">
+                  <td colspan="3" class="p-0 border-0">
+                    <div class="p-3 mx-2 my-1 info-hint">
+                      <div class="d-flex justify-content-between mb-2">
+                        <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">CATEGORÍA: <strong class="text-accent">{{ t.category }}</strong></span>
+                        <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">{{ new Date(t.createdAt).toLocaleString() }}</span>
+                      </div>
+                      <p class="small opacity-75 mb-0" style="white-space: pre-wrap; font-family: 'Inter', sans-serif;">{{ t.description }}</p>
+                    </div>
+                  </td>
+                </tr>
+              </template>
               <tr v-if="myTickets.length === 0">
                 <td colspan="3" class="text-center py-5 opacity-55">
                   No has levantado tickets recientemente.
@@ -127,6 +132,7 @@ const subject     = ref('')
 const category    = ref('Hardware')
 const description = ref('')
 const ticketSuccess = ref(false)
+const expandedTicket = ref(null) // Nuevo estado reactivo para la expansión
 const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
@@ -138,17 +144,18 @@ const myTickets = computed(() =>
   [...store.tickets, ...store.closedTickets].filter(t => t.author === store.currentUser?.fullName)
 )
 
-// Validación: El botón se activa solo si hay texto en ambos campos
 const isFormValid = computed(() => subject.value.trim() !== '' && description.value.trim() !== '')
 
 const submitTicket = () => {
   store.addTicket(subject.value, category.value, description.value)
   subject.value     = ''
   description.value = ''
-  
-  // Mostrar mensaje de éxito temporalmente
   ticketSuccess.value = true
   setTimeout(() => ticketSuccess.value = false, 3500)
+}
+
+const toggleTicket = (id) => {
+  expandedTicket.value = expandedTicket.value === id ? null : id
 }
 
 const logout = () => { store.logout(); router.push('/') }

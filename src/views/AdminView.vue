@@ -2,7 +2,6 @@
   <div class="d-flex flex-column vh-100 admin-bg" id="wrapper">
     <div class="d-flex flex-grow-1 overflow-hidden p-3 gap-3">
 
-      <!-- Sidebar -->
       <div class="glass-admin p-4 d-flex flex-column justify-content-between flex-shrink-0" style="width: 280px;">
         <div>
           <div class="logo mb-5 text-accent">SYS_ADMIN</div>
@@ -26,7 +25,6 @@
           </nav>
         </div>
 
-        <!-- Theme Toggle -->
         <div>
           <button @click="toggle" class="theme-toggle mb-3">
             <span class="theme-toggle-icon">{{ isDark ? '☀' : '☾' }}</span>
@@ -35,18 +33,16 @@
           <div class="small mb-2 opacity-55 text-capitalize">
             Admin: {{ store.currentUser?.fullName }}
           </div>
-          <button @click="handleLogout" class="btn btn-outline-light w-100 rounded-pill">
+          <button @click="handleLogout" class="btn btn-outline-light w-100">
             Cerrar Sesión
           </button>
         </div>
       </div>
 
-      <!-- Contenido principal -->
       <div class="glass-admin container-fluid p-5 d-flex flex-column overflow-auto w-100">
 
-        <!-- ─ Dashboard: Mis Tickets Asignados ─ -->
         <div v-if="currentTab === 'dashboard'">
-          <h2 class="h3 mb-4 fw-bold">Mis Tickets Asignados</h2>
+          <h2 class="h3 mb-4 fw-bold">Mis Tickets Asignados <span class="h6 opacity-55 fw-normal text-lowercase">(clic para detalles)</span></h2>
           <div class="panel-inner p-4">
             <table class="table table-borderless align-middle mb-0">
               <thead>
@@ -59,18 +55,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="t in myAssignedTickets" :key="t.id">
-                  <td class="ps-3 col-id">{{ t.id }}</td>
-                  <td><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
-                  <td class="text-capitalize">{{ t.author }}</td>
-                  <td>{{ t.subject }}</td>
-                  <td>
-                    <button @click="marcarComoHecho(t.id)"
-                            class="btn btn-sm btn-info rounded-pill fw-bold px-3">
-                      ✔ Hecho
-                    </button>
-                  </td>
-                </tr>
+                <template v-for="t in myAssignedTickets" :key="t.id">
+                  <tr @click="toggleTicket(t.id)" style="cursor: pointer;">
+                    <td class="ps-3 col-id">{{ t.id }}</td>
+                    <td><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
+                    <td class="text-capitalize">{{ t.author }}</td>
+                    <td>{{ t.subject }}</td>
+                    <td>
+                      <button @click.stop="marcarComoHecho(t.id)"
+                              class="btn btn-sm btn-info px-3">
+                        ✔ Hecho
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="expandedTicket === t.id">
+                    <td colspan="5" class="p-0 border-0">
+                      <div class="p-3 mx-2 my-1 info-hint">
+                        <div class="d-flex justify-content-between mb-2">
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">CATEGORÍA: <strong class="text-accent">{{ t.category }}</strong></span>
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">{{ new Date(t.createdAt).toLocaleString() }}</span>
+                        </div>
+                        <p class="small opacity-75 mb-0" style="white-space: pre-wrap; font-family: 'Inter', sans-serif;">{{ t.description }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
                 <tr v-if="myAssignedTickets.length === 0">
                   <td colspan="5" class="text-center py-5 opacity-55">
                     No tienes tickets asignados en cola.
@@ -81,12 +90,11 @@
           </div>
         </div>
 
-        <!-- ─ Directorio de Usuarios ─ -->
         <div v-if="currentTab === 'usuarios'">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h3 m-0 fw-bold">Directorio de Usuarios</h2>
             <RouterLink to="/admin/nuevo-usuario"
-                        class="btn btn-info rounded-pill fw-bold px-4">
+                        class="btn btn-info fw-bold px-4">
               + Nuevo Usuario
             </RouterLink>
           </div>
@@ -119,15 +127,28 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="t in userTickets(selectedUser.fullName)" :key="t.id">
-                      <td class="ps-3 col-id">{{ t.id }}</td>
-                      <td>{{ t.subject }}</td>
-                      <td>
-                        <span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">
-                          {{ t.status }}
-                        </span>
-                      </td>
-                    </tr>
+                    <template v-for="t in userTickets(selectedUser.fullName)" :key="t.id">
+                      <tr @click="toggleTicket(t.id)" style="cursor: pointer;">
+                        <td class="ps-3 col-id">{{ t.id }}</td>
+                        <td>{{ t.subject }}</td>
+                        <td>
+                          <span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">
+                            {{ t.status }}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr v-if="expandedTicket === t.id">
+                        <td colspan="3" class="p-0 border-0">
+                          <div class="p-3 mx-2 my-1 info-hint">
+                            <div class="d-flex justify-content-between mb-2">
+                              <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">CATEGORÍA: <strong class="text-accent">{{ t.category }}</strong></span>
+                              <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">{{ new Date(t.createdAt).toLocaleString() }}</span>
+                            </div>
+                            <p class="small opacity-75 mb-0" style="white-space: pre-wrap; font-family: 'Inter', sans-serif;">{{ t.description }}</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
                     <tr v-if="userTickets(selectedUser.fullName).length === 0">
                       <td colspan="3" class="text-center py-5 opacity-55">
                         Este usuario no ha levantado tickets.
@@ -146,7 +167,6 @@
           </div>
         </div>
 
-        <!-- ─ Tickets Sin Asignar ─ -->
         <div v-if="currentTab === 'disponibles'">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h3 m-0 fw-bold">
@@ -176,18 +196,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="t in filteredUnassigned" :key="t.id">
-                  <td class="ps-3 col-id">{{ t.id }}</td>
-                  <td><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
-                  <td class="text-capitalize">{{ t.author }}</td>
-                  <td>{{ t.subject }}</td>
-                  <td>
-                    <button @click="tomarTicket(t.id)"
-                            class="btn btn-sm btn-outline-info rounded-pill px-3">
-                      Tomar
-                    </button>
-                  </td>
-                </tr>
+                <template v-for="t in filteredUnassigned" :key="t.id">
+                  <tr @click="toggleTicket(t.id)" style="cursor: pointer;">
+                    <td class="ps-3 col-id">{{ t.id }}</td>
+                    <td><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
+                    <td class="text-capitalize">{{ t.author }}</td>
+                    <td>{{ t.subject }}</td>
+                    <td>
+                      <button @click.stop="tomarTicket(t.id)"
+                              class="btn btn-sm btn-outline-info px-3">
+                        Tomar
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="expandedTicket === t.id">
+                    <td colspan="5" class="p-0 border-0">
+                      <div class="p-3 mx-2 my-1 info-hint">
+                        <div class="d-flex justify-content-between mb-2">
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">CATEGORÍA: <strong class="text-accent">{{ t.category }}</strong></span>
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">{{ new Date(t.createdAt).toLocaleString() }}</span>
+                        </div>
+                        <p class="small opacity-75 mb-0" style="white-space: pre-wrap; font-family: 'Inter', sans-serif;">{{ t.description }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
                 <tr v-if="filteredUnassigned.length === 0">
                   <td colspan="5" class="text-center py-5 opacity-55">
                     No hay tickets pendientes con ese filtro.
@@ -198,7 +231,6 @@
           </div>
         </div>
 
-        <!-- ─ Historial de Hechos ─ -->
         <div v-if="currentTab === 'hechos'">
           <h2 class="h3 mb-4 fw-bold">Archivo de Tickets Resueltos</h2>
           <div class="panel-inner p-4">
@@ -212,12 +244,25 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="t in store.closedTickets" :key="t.id">
-                  <td class="ps-3 col-id">{{ t.id }}</td>
-                  <td class="text-capitalize">{{ t.author }}</td>
-                  <td>{{ t.subject }}</td>
-                  <td><span class="badge badge-hecho">Resuelto</span></td>
-                </tr>
+                <template v-for="t in store.closedTickets" :key="t.id">
+                  <tr @click="toggleTicket(t.id)" style="cursor: pointer;">
+                    <td class="ps-3 col-id">{{ t.id }}</td>
+                    <td class="text-capitalize">{{ t.author }}</td>
+                    <td>{{ t.subject }}</td>
+                    <td><span class="badge badge-hecho">Resuelto</span></td>
+                  </tr>
+                  <tr v-if="expandedTicket === t.id">
+                    <td colspan="4" class="p-0 border-0">
+                      <div class="p-3 mx-2 my-1 info-hint">
+                        <div class="d-flex justify-content-between mb-2">
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">CATEGORÍA: <strong class="text-accent">{{ t.category }}</strong></span>
+                          <span class="small opacity-55" style="font-family: 'IBM Plex Mono', monospace;">{{ new Date(t.createdAt).toLocaleString() }}</span>
+                        </div>
+                        <p class="small opacity-75 mb-0" style="white-space: pre-wrap; font-family: 'Inter', sans-serif;">{{ t.description }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
                 <tr v-if="store.closedTickets.length === 0">
                   <td colspan="4" class="text-center py-5 opacity-55">
                     Aún no hay tickets marcados como resueltos.
@@ -243,6 +288,7 @@ const router         = useRouter()
 const currentTab     = ref('dashboard')
 const selectedUser   = ref(null)
 const priorityFilter = ref('todas')
+const expandedTicket = ref(null) // Nuevo estado reactivo
 const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
@@ -269,4 +315,8 @@ const userTickets    = (name)  => [...store.tickets, ...store.closedTickets].fil
 const tomarTicket    = (id)    => store.acceptTicket(id)
 const marcarComoHecho = (id)   => store.closeTicket(id)
 const handleLogout   = ()      => { store.logout(); router.push('/') }
+
+const toggleTicket = (id) => {
+  expandedTicket.value = expandedTicket.value === id ? null : id
+}
 </script>
