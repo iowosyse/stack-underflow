@@ -1,117 +1,117 @@
 <template>
-  <div class="d-flex flex-column vh-100 bg-light" id="wrapper">
-    <div class="d-flex flex-grow-1 overflow-hidden">
-      <div class="sidebar p-4 d-flex flex-column justify-content-between flex-shrink-0" style="width: 280px;">
+  <div class="d-flex flex-column vh-100 user-bg" id="wrapper">
+    <div class="d-flex flex-grow-1 overflow-hidden p-3 gap-3">
+
+      <!-- Sidebar -->
+      <div class="glass-user p-4 d-flex flex-column justify-content-between flex-shrink-0" style="width: 280px;">
         <div>
-          <div class="logo h4 fw-bold mb-5 text-primary">stack-underflow</div>
-          <div class="list-group list-group-flush bg-transparent">
-            <RouterLink to="/user" class="list-group-item list-group-item-action bg-transparent">Mis Tickets</RouterLink>
-            <RouterLink to="/knowledge-base" class="list-group-item list-group-item-action bg-transparent active">Base de Conocimiento</RouterLink>
-          </div>
+          <div class="logo mb-5 text-accent">stack-underflow</div>
+          <nav class="list-group list-group-flush">
+            <RouterLink to="/user"           class="list-group-item">Mis Tickets</RouterLink>
+            <RouterLink to="/knowledge-base" class="list-group-item">Base de Conocimiento</RouterLink>
+          </nav>
         </div>
+
+        <!-- Theme Toggle -->
         <div>
-          <div class="small text-muted mb-2 text-capitalize">Perfil: <strong class="text-dark">{{ store.currentUser?.fullName || 'Usuario' }}</strong></div>
-          <button @click="logout" class="btn btn-outline-danger w-100">Cerrar Sesión</button>
+          <button @click="toggle" class="theme-toggle mb-3">
+            <span class="theme-toggle-icon">{{ isDark ? '☀' : '☾' }}</span>
+            <span class="theme-toggle-label">{{ isDark ? 'Modo Claro' : 'Modo Oscuro' }}</span>
+          </button>
+          <div class="small mb-2 opacity-55 text-capitalize">
+            Perfil: <strong>{{ store.currentUser?.fullName || 'Usuario' }}</strong>
+          </div>
+          <button @click="logout" class="btn btn-outline-danger w-100 rounded-pill">
+            Cerrar Sesión
+          </button>
         </div>
       </div>
 
-      <div class="container-fluid p-5 d-flex flex-column overflow-auto">
-        <div class="mb-4 pb-2 border-bottom">
+      <!-- Contenido -->
+      <div class="glass-user container-fluid p-5 d-flex flex-column overflow-auto w-100">
+
+        <div class="mb-4 pb-3 border-bottom">
           <h1 class="h3 m-0 fw-bold">Ayuda y Tutoriales</h1>
-          <p class="text-muted mt-2">Resuelve tus dudas rápidas sin esperar a un técnico.</p>
+          <p class="opacity-55 mt-2 mb-0" style="font-size: 0.875rem;">
+            Resuelve dudas frecuentes sin esperar a un técnico.
+          </p>
         </div>
 
-        <div class="row g-4 mb-5">
-          <div class="col-12">
-            
-            <div class="card p-3 mb-4">
-              <div class="card-header bg-transparent border-0 fw-bold fs-5">Redes e Internet</div>
-              <div class="card-body">
-                
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans1')">&#9656; ¿Qué es una red y por qué no tengo sistema?</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans1'">
-                    <p>Una red es simplemente un grupo de computadoras conectadas entre sí para compartir información (como carpetas compartidas o impresoras). Si "no tienes sistema", usualmente significa que tu computadora perdió la conexión con el servidor principal.</p>
-                    <p><strong>Solución rápida:</strong> Revisa si puedes entrar a páginas web normales (como Google). Si tampoco cargan, es tu internet.</p>
-                  </div>
-                </div>
+        <!-- Sección: Redes e Internet -->
+        <div class="panel-inner p-4 mb-4">
+          <h5 class="fw-bold mb-4 text-accent" style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'Inter', sans-serif;">
+            Redes e Internet
+          </h5>
 
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans2')">&#9656; ¿Qué cable necesito para conectarme a internet?</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans2'">
-                    <p>El cable estándar se llama <strong>Ethernet (o RJ45)</strong>. Es parecido a un cable de teléfono fijo, pero la punta es más gruesa y suele ser de color azul, gris o amarillo.</p>
-                    <p>Debe conectarse en el puerto que tiene luces parpadeantes (verde/naranja) en la parte trasera de tu PC o lateral de tu laptop.</p>
-                  </div>
-                </div>
-
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans3')">&#9656; Diferencia entre WiFi y Cable</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans3'">
-                    <p>El <strong>Cable</strong> es más rápido y estable, ideal para trabajar en la oficina. El <strong>WiFi</strong> es inalámbrico, pero puede fallar si estás lejos del módem o hay muchas paredes. Siempre preferimos que uses cable para evitar desconexiones.</p>
-                  </div>
-                </div>
-
-              </div>
+          <div class="accordion-item-inner mb-3 p-3" @click="toggle_acc('ans1')">
+            <div class="accordion-header fw-bold">
+              &#9656; ¿Qué es una red y por qué no tengo sistema?
             </div>
-
-            <div class="card p-3">
-              <div class="card-header bg-transparent border-0 fw-bold fs-5">Tutoriales Comunes</div>
-              <div class="card-body">
-                
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans4')">&#9656; ¿Cómo instalar Google Chrome en una PC nueva?</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans4'">
-                    <ol style="margin-left: 20px;">
-                      <li>Abre el navegador que viene por defecto (Edge en Windows o Safari en Mac).</li>
-                      <li>En la barra de direcciones escribe: <code>google.com/chrome</code></li>
-                      <li>Haz clic en el botón azul grande que dice <strong>"Descargar Chrome"</strong>.</li>
-                      <li>Se descargará un archivo. Haz clic sobre él para abrirlo.</li>
-                      <li>Espera a que termine la instalación automática. ¡Listo!</li>
-                    </ol>
-                  </div>
-                </div>
-
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans5')">&#9656; Olvidé mi contraseña, ¿cómo la restablezco?</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans5'">
-                    <p>No necesitas crear un ticket para esto. Sigue estos pasos:</p>
-                    <ol style="margin-left: 20px;">
-                      <li>En la pantalla de inicio de sesión, busca el enlace pequeño que dice <strong>"¿Olvidaste tu contraseña?"</strong>.</li>
-                      <li>Ingresa tu correo electrónico corporativo.</li>
-                      <li>Revisa tu bandeja de entrada (y la carpeta de Spam). Recibirás un enlace seguro.</li>
-                      <li>Haz clic en el enlace y escribe tu nueva contraseña dos veces.</li>
-                    </ol>
-                  </div>
-                </div>
-
-                <div class="mb-3 p-2 border-bottom">
-                  <div class="fw-bold text-primary accordion-header" @click="toggle('ans6')">&#9656; Mi impresora no imprime</div>
-                  <div class="mt-2 text-secondary px-3 accordion-content" v-show="openTab === 'ans6'">
-                    <ul>
-                      <li>Revisa que la impresora esté encendida (luz verde).</li>
-                      <li>Revisa que tenga papel en la bandeja.</li>
-                      <li>Verifica que el cable USB esté bien conectado a tu computadora.</li>
-                      <li>Si nada funciona, intenta reiniciar la impresora (apagar y prender).</li>
-                    </ul>
-                  </div>
-                </div>
-
-              </div>
+            <div class="mt-3 opacity-55 accordion-content" v-show="openTab === 'ans1'" style="font-size: 0.9rem; line-height: 1.6;">
+              <p>Una red es un grupo de computadoras conectadas para compartir información. Si "no tienes sistema", generalmente significa que tu computadora perdió la conexión con el servidor principal.</p>
+              <p class="mb-0"><strong>Solución rápida:</strong> Revisa si puedes abrir páginas web normales. Si tampoco cargan, el problema es tu internet.</p>
             </div>
+          </div>
 
+          <div class="accordion-item-inner mb-3 p-3" @click="toggle_acc('ans2')">
+            <div class="accordion-header fw-bold">
+              &#9656; ¿Qué cable necesito para conectarme a internet?
+            </div>
+            <div class="mt-3 opacity-55 accordion-content" v-show="openTab === 'ans2'" style="font-size: 0.9rem; line-height: 1.6;">
+              <p class="mb-0">El cable estándar se llama <strong>Ethernet (RJ-45)</strong>. Es parecido al de teléfono fijo pero con la punta más gruesa. Generalmente es azul, gris o amarillo.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item-inner p-3" @click="toggle_acc('ans3')">
+            <div class="accordion-header fw-bold">
+              &#9656; Diferencia entre WiFi y Cable
+            </div>
+            <div class="mt-3 opacity-55 accordion-content" v-show="openTab === 'ans3'" style="font-size: 0.9rem; line-height: 1.6;">
+              <p class="mb-0">El <strong>Cable</strong> es más rápido y estable. El <strong>WiFi</strong> es inalámbrico pero puede fallar a cierta distancia del módem. Siempre que sea posible, usa cable para evitar desconexiones.</p>
+            </div>
           </div>
         </div>
 
-        <div class="py-3 mt-auto text-center w-100 border-top text-muted">
-            <p class="m-0 small">&copy; 2026 stack-underflow System. Todos los derechos reservados.</p>
-            <div class="mt-2 w3c-badges">
-                <a href="https://validator.w3.org/nu/?doc=referer" target="_blank">
-                    <img src="https://www.w3.org/Icons/valid-html5" alt="Valid HTML5" height="31" width="88">
-                </a>
-                <a href="https://jigsaw.w3.org/css-validator/check/referer" target="_blank">
-                    <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue" alt="CSS Valido!" height="31" width="88">
-                </a>
+        <!-- Sección: Tutoriales Comunes -->
+        <div class="panel-inner p-4 mb-4">
+          <h5 class="fw-bold mb-4 text-accent" style="font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; font-family: 'Inter', sans-serif;">
+            Tutoriales Comunes
+          </h5>
+
+          <div class="accordion-item-inner mb-3 p-3" @click="toggle_acc('ans4')">
+            <div class="accordion-header fw-bold">
+              &#9656; ¿Cómo instalar Google Chrome en una PC nueva?
             </div>
+            <div class="mt-3 opacity-55 accordion-content" v-show="openTab === 'ans4'" style="font-size: 0.9rem; line-height: 1.6;">
+              <ol style="margin-left: 20px; margin-bottom: 0;">
+                <li>Abre el navegador predeterminado (Edge o Safari).</li>
+                <li>Escribe en la barra de direcciones: <code>google.com/chrome</code></li>
+                <li>Haz clic en el botón <strong>"Descargar Chrome"</strong>.</li>
+                <li>Espera a que termine la instalación automática.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="accordion-item-inner p-3" @click="toggle_acc('ans5')">
+            <div class="accordion-header fw-bold">
+              &#9656; Olvidé mi contraseña, ¿cómo la restablezco?
+            </div>
+            <div class="mt-3 opacity-55 accordion-content" v-show="openTab === 'ans5'" style="font-size: 0.9rem; line-height: 1.6;">
+              <p>No necesitas crear un ticket para esto:</p>
+              <ol style="margin-left: 20px; margin-bottom: 0;">
+                <li>En la pantalla de inicio busca <strong>"¿Olvidaste tu contraseña?"</strong>.</li>
+                <li>Ingresa tu correo electrónico corporativo.</li>
+                <li>Revisa tu bandeja de entrada y haz clic en el enlace seguro.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="py-3 mt-auto text-center w-100 border-top opacity-55">
+          <p class="m-0" style="font-size: 0.78rem; letter-spacing: 0.05em; font-family: 'Inter', sans-serif;">
+            &copy; 2026 stack-underflow System.
+          </p>
         </div>
 
       </div>
@@ -120,40 +120,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { store } from '../store'
+import { useTheme } from '../composables/useTheme'
 
-const router = useRouter()
+const router  = useRouter()
 const openTab = ref(null)
+const { isDark, toggle, init } = useTheme()
 
-const toggle = (id) => {
-  openTab.value = openTab.value === id ? null : id
-}
+onMounted(() => init())
 
-const logout = () => {
-  store.logout()
-  router.push('/')
-}
+const toggle_acc = (id) => { openTab.value = openTab.value === id ? null : id }
+const logout     = () => { store.logout(); router.push('/') }
 </script>
 
 <style scoped>
-.accordion-header { 
-  cursor: pointer; 
-  user-select: none;
-  transition: color 0.2s;
-}
-.accordion-header:hover {
-  color: #0a58ca !important;
-}
-.w3c-badges a { 
-  display: inline-block; 
-  margin: 0 5px; 
-  text-decoration: none; 
-  border: none; 
-}
-.w3c-badges img { 
-  border: 0; 
-  vertical-align: middle; 
-}
+.accordion-item-inner { cursor: pointer; }
 </style>

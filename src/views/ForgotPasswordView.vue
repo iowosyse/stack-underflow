@@ -1,46 +1,54 @@
 <template>
-  <div class="bg-light d-flex flex-column align-items-center justify-content-center vh-100">
-    <div class="login-box p-5 shadow-sm bg-white mb-auto mt-auto">
-      <h3 class="text-center mb-3 fw-bold">Recuperar Acceso</h3>
-      <p class="text-muted small text-center mb-4">Ingresa tus datos para recibir un enlace de restablecimiento.</p>
-      
-      <form @submit.prevent="handleRecover">
+  <div class="d-flex flex-column align-items-center justify-content-center vh-100 user-bg">
+
+    <!-- Theme Toggle Flotante -->
+    <button @click="toggle" class="theme-toggle theme-toggle--float">
+      <span class="theme-toggle-icon">{{ isDark ? '☀' : '☾' }}</span>
+      <span class="theme-toggle-label">{{ isDark ? 'Claro' : 'Oscuro' }}</span>
+    </button>
+
+    <div class="glass-user p-5 text-center" style="width: 100%; max-width: 420px;">
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-2 text-accent">Recuperar Acceso</h2>
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.30; margin: 0 auto; width: 60%;"></div>
+        <p class="small mt-3 opacity-55">
+          Ingresa tus datos para recibir un enlace de restablecimiento en tu correo corporativo.
+        </p>
+      </div>
+
+      <form @submit.prevent="handleRecover" class="text-start">
         <div class="mb-3">
-          <label for="employeeId" class="form-label small fw-bold text-uppercase">ID de Empleado</label>
-          <input type="text" id="employeeId" class="form-control" v-model="employeeId">
+          <label class="form-label">ID de Empleado / Matrícula</label>
+          <input type="text" class="form-control" v-model="employeeId" placeholder="Ej. EMP-1024">
         </div>
-        <div class="mb-3">
-          <label for="email" class="form-label small fw-bold text-uppercase">Correo Corporativo</label>
-          <input type="email" id="email" class="form-control" v-model="email">
+        <div class="mb-4">
+          <label class="form-label">Correo Corporativo</label>
+          <input type="email" class="form-control" v-model="email" placeholder="usuario@empresa.com">
         </div>
-        <button type="submit" class="btn btn-primary w-100 py-2 rounded-0 mb-2">ENVIAR ENLACE</button>
-        <RouterLink to="/" class="btn btn-outline-secondary w-100 py-2 rounded-0">VOLVER AL LOGIN</RouterLink>
+        <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill mb-3">
+          Enviar Enlace
+        </button>
+        <RouterLink to="/" class="btn btn-outline-dark w-100 py-2 rounded-pill">
+          ← Volver al Login
+        </RouterLink>
       </form>
     </div>
 
-    <div class="py-3 mt-auto text-center w-100 border-top border-secondary-subtle bg-white">
-      <div class="container small text-muted">
-        <p class="m-0">&copy; 2026 stack-underflow. Todos los derechos reservados.</p>
-        <div class="mt-2 w3c-badges">
-          <a href="https://validator.w3.org/nu/?doc=referer">
-            <img src="https://www.w3.org/Icons/valid-html5" alt="Valid HTML5" height="31" width="88">
-          </a>
-          <a href="https://jigsaw.w3.org/css-validator/check/referer">
-            <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue" alt="CSS Valido!" height="31" width="88">
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useTheme } from '../composables/useTheme'
 
-const router = useRouter()
+const router     = useRouter()
 const employeeId = ref('')
-const email = ref('')
+const email      = ref('')
+const { isDark, toggle, init } = useTheme()
+
+onMounted(() => init())
 
 const handleRecover = () => {
   if (employeeId.value && email.value) {
@@ -51,8 +59,3 @@ const handleRecover = () => {
   }
 }
 </script>
-
-<style scoped>
-/* Usamos el CSS externo exclusivamente para esta vista */
-@import url('https://cdn.jsdelivr.net/gh/iowosyse/estilos@cssP2/su-style.css');
-</style>
