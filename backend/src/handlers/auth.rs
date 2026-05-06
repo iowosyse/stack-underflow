@@ -2,15 +2,14 @@ use axum::{extract::State, http::StatusCode, response::Json};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
+use sha2::{Sha256, Digest};
 
-// Lo que recibe de Vue
 #[derive(Deserialize)]
 pub struct LoginRequest {
     pub email: String,
-    pub contrasena: String,
+    pub password: String, 
 }
 
-// Lo que le responde a Vue
 #[derive(Serialize)]
 pub struct LoginResponse {
     pub token: String,
@@ -23,7 +22,15 @@ pub async fn login_handler(
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, (StatusCode, String)> {
     
-    // 1. Buscamos al usuario y casteamos el ENUM a texto directamente en Postgres
+    // 1. Convertimos la contraseña a un Hash SHA-256
+    let mut hasher = Sha256::new();
+    hasher.update(payload.password.as_bytes());
+    let password_hasheada = hasher.finalize()
+        .iter()
+        .map(|b| format!("{:02x}", b))
+        .collect::<String>();
+
+    // 2. Buscamos al usuario usando el HASH generado
     let usuario = sqlx::query!(
         r#"
         SELECT id, nombre, rol::text as "rol!" 
@@ -31,12 +38,13 @@ pub async fn login_handler(
         WHERE email = $1 AND password_hash = $2
         "#,
         payload.email,
-        payload.contrasena // Usamos el nombre que viene desde Vue
+        password_hasheada // <--- AQUÍ ES DONDE SE IMPLEMENTA
     )
     .fetch_optional(&pool)
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
+    // 3. Manejamos el resultado
     match usuario {
         Some(u) => {
             let nuevo_token = Uuid::new_v4().to_string();
@@ -48,13 +56,12 @@ pub async fn login_handler(
             )
             .execute(&pool)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Error al guardar token: {}", e)))?;
 
-            // 4. Como no son nulos, simplemente pasamos las variables directas
             Ok(Json(LoginResponse {
                 token: nuevo_token,
-                rol: u.rol,       // ¡Sin unwrap!
-                nombre: u.nombre, // ¡Sin unwrap!
+                rol: u.rol,       
+                nombre: u.nombre, 
             }))
         }
         None => Err((StatusCode::UNAUTHORIZED, "Credenciales incorrectas".to_string())),
