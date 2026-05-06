@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, rol::text as nombre_rol \n        FROM usuarios \n        WHERE email = $1 \n          AND password_hash = encode(digest($2, 'sha256'), 'hex') \n          AND activo = true\n        ",
+  "query": "\n        SELECT id, nombre, rol::text as \"rol!\" \n        FROM usuarios \n        WHERE email = $1 AND password_hash = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -10,7 +10,12 @@
       },
       {
         "ordinal": 1,
-        "name": "nombre_rol",
+        "name": "nombre",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "rol!",
         "type_info": "Text"
       }
     ],
@@ -22,8 +27,9 @@
     },
     "nullable": [
       false,
+      false,
       null
     ]
   },
-  "hash": "5f778d57001a186b3340873624c80202db8154230b1598fa125c81a45c17e0c8"
+  "hash": "f98f6c00d8295f74b64ee26c8b1f720241c61658a1f8b89b1099473bf4e4989c"
 }

@@ -35,7 +35,7 @@ async fn main() {
         .expect("No se pudo conectar a la base de datos de Neon");
 
     let app = Router::new()
-        .route("/api/login", post(handlers::auth::login_usuario))
+        .route("/api/login", post(handlers::auth::login_handler))
         .route("/api/status", get(health_check))
         .with_state(pool);
 
