@@ -38,7 +38,7 @@ pub async fn login_handler(
         WHERE email = $1 AND password_hash = $2
         "#,
         payload.email,
-        password_hasheada // <--- AQUÍ ES DONDE SE IMPLEMENTA
+        password_hasheada //
     )
     .fetch_optional(&pool)
     .await
