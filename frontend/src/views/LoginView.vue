@@ -40,75 +40,71 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-// Dependiendo de tu arquitectura, puedes mantener el store o quitarlo si solo usarás localStorage
-// import { store } from '../store' 
 import { useTheme } from '../composables/useTheme'
 
 const router   = useRouter()
 const username = ref('')
 const password = ref('')
-const cargando = ref(false) // Estado para bloquear el botón mientras se valida
+const cargando = ref(false)
 const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
 
 const handleLogin = async () => {
-  // Validación básica del frontend
   if (!username.value || !password.value) {
-    alert("Por favor ingresa usuario y contraseña.");
-    return;
+    alert('Por favor ingresa usuario y contraseña.')
+    return
   }
 
-  cargando.value = true;
+  cargando.value = true
 
   try {
-    // 1. Construir el correo esperado por el backend (ej. alberto.montoya@tecnm.mx)
-    const userLimpio = username.value.trim().toLowerCase();
-    const passLimpia = password.value.trim().toLowerCase().replace(/\s/g, '');
-    const emailBackend = `${userLimpio}.${passLimpia}@tecnm.mx`;
+    const userLimpio = username.value.trim().toLowerCase()
+    const passLimpia = password.value.trim().toLowerCase().replace(/\s/g, '')
+    const emailBackend = `${userLimpio}.${passLimpia}@tecnm.mx`
 
-    // 2. Formatear la contraseña para el SHA256 de Postgres (Primera mayúscula, ej. "Montoya")
-    const passOriginal = password.value.trim();
-    const passParaBackend = passOriginal.charAt(0).toUpperCase() + passOriginal.slice(1).toLowerCase();
+    const passOriginal     = password.value.trim()
+    const passParaBackend  = passOriginal.charAt(0).toUpperCase() + passOriginal.slice(1).toLowerCase()
 
-    // 3. Petición AJAX al proxy de Vite -> Servidor Rust
     const respuesta = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        email: emailBackend, 
-        password: passParaBackend 
+      body: JSON.stringify({
+        email: emailBackend,
+        password: passParaBackend
       })
-    });
+    })
 
     if (respuesta.ok) {
-      // 4. Extraer los datos del JSON (id, rol, token)
-      const datos = await respuesta.json();
-      
-      // 5. Conservar sesión en el navegador
-      localStorage.setItem('token', datos.token);
-      localStorage.setItem('rol', datos.rol);
-      localStorage.setItem('usuario_id', datos.id);
+      const datos = await respuesta.json()
 
-      // 6. Redirección basada en el ENUM de la base de datos
+      localStorage.setItem('token', datos.token)
+      localStorage.setItem('rol', datos.rol)
+      localStorage.setItem('usuario_id', datos.id)
+      if (datos.nombre) localStorage.setItem('usuario_nombre', datos.nombre)
+
+      // Se corrigió el ruteo para que coincida exactamente con los roles del Backend
       if (datos.rol === 'administrador') {
-        router.push('/admin');
+        router.push('/ejecutivo')
+      } else if (datos.rol === 'soporte') {
+        router.push('/soporte')
       } else if (datos.rol === 'cliente') {
-        router.push('/user');
+        router.push('/user')
       } else {
-        router.push('/');
+        alert(`Rol desconocido recibido del servidor: "${datos.rol}".`)
+        router.push('/')
       }
-      
+
     } else if (respuesta.status === 401) {
-      alert("Credenciales incorrectas. Revisa tu usuario y contraseña.");
+      alert('Credenciales incorrectas. Revisa tu usuario y contraseña.')
     } else {
-      alert("Error interno en la base de datos.");
+      alert('Error interno en la base de datos.')
     }
   } catch (error) {
-    console.error("Fallo de red:", error);
-    alert("No se pudo establecer conexión con el servidor.");
+    console.error('Fallo de red:', error)
+    alert('No se pudo establecer conexión con el servidor.')
   } finally {
-    cargando.value = false;
+    cargando.value = false
   }
 }
 </script>

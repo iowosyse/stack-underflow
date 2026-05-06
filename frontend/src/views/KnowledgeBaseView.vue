@@ -158,6 +158,12 @@ const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
 
+const handleLogout = () => { 
+  localStorage.clear();
+  store.logout(); 
+  router.push('/'); 
+}
+
 const toggle_acc = (id) => { openTab.value = openTab.value === id ? null : id }
 const logout     = ()   => { store.logout(); router.push('/') }
 
