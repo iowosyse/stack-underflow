@@ -25,8 +25,8 @@
           <input type="password" class="form-control" v-model="password"
                  placeholder="apellidos, sin acentos">
         </div>
-        <button type="submit" class="btn btn-dark w-100 py-2 rounded-pill mb-3">
-          Ingresar al Sistema
+        <button type="submit" class="btn btn-dark w-100 py-2 rounded-pill mb-3" :disabled="cargando">
+          {{ cargando ? 'Verificando...' : 'Ingresar al Sistema' }}
         </button>
         <RouterLink to="/forgot-password" class="btn btn-outline-dark w-100 py-2 rounded-pill">
           Olvidé mi Contraseña
@@ -40,20 +40,75 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { store } from '../store'
+// Dependiendo de tu arquitectura, puedes mantener el store o quitarlo si solo usarás localStorage
+// import { store } from '../store' 
 import { useTheme } from '../composables/useTheme'
 
 const router   = useRouter()
 const username = ref('')
 const password = ref('')
+const cargando = ref(false) // Estado para bloquear el botón mientras se valida
 const { isDark, toggle, init } = useTheme()
 
 onMounted(() => init())
 
-const handleLogin = () => {
-  const role = store.login(username.value, password.value)
-  if      (role === 'admin') router.push('/admin')
-  else if (role === 'user')  router.push('/user')
-  else alert("Credenciales incorrectas. (Recuerda: minúsculas y sin acentos)")
+const handleLogin = async () => {
+  // Validación básica del frontend
+  if (!username.value || !password.value) {
+    alert("Por favor ingresa usuario y contraseña.");
+    return;
+  }
+
+  cargando.value = true;
+
+  try {
+    // 1. Construir el correo esperado por el backend (ej. alberto.montoya@tecnm.mx)
+    const userLimpio = username.value.trim().toLowerCase();
+    const passLimpia = password.value.trim().toLowerCase().replace(/\s/g, '');
+    const emailBackend = `${userLimpio}.${passLimpia}@tecnm.mx`;
+
+    // 2. Formatear la contraseña para el SHA256 de Postgres (Primera mayúscula, ej. "Montoya")
+    const passOriginal = password.value.trim();
+    const passParaBackend = passOriginal.charAt(0).toUpperCase() + passOriginal.slice(1).toLowerCase();
+
+    // 3. Petición AJAX al proxy de Vite -> Servidor Rust
+    const respuesta = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email: emailBackend, 
+        password: passParaBackend 
+      })
+    });
+
+    if (respuesta.ok) {
+      // 4. Extraer los datos del JSON (id, rol, token)
+      const datos = await respuesta.json();
+      
+      // 5. Conservar sesión en el navegador
+      localStorage.setItem('token', datos.token);
+      localStorage.setItem('rol', datos.rol);
+      localStorage.setItem('usuario_id', datos.id);
+
+      // 6. Redirección basada en el ENUM de la base de datos
+      if (datos.rol === 'administrador') {
+        router.push('/admin');
+      } else if (datos.rol === 'cliente') {
+        router.push('/user');
+      } else {
+        router.push('/');
+      }
+      
+    } else if (respuesta.status === 401) {
+      alert("Credenciales incorrectas. Revisa tu usuario y contraseña.");
+    } else {
+      alert("Error interno en la base de datos.");
+    }
+  } catch (error) {
+    console.error("Fallo de red:", error);
+    alert("No se pudo establecer conexión con el servidor.");
+  } finally {
+    cargando.value = false;
+  }
 }
 </script>

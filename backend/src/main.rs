@@ -1,8 +1,11 @@
-// Proyecto: Sistema de Tickets
-
-use axum::{routing::get, Router, Json};
+use axum::{routing::post, Router};
+use axum::{routing::get, Json};
+use sqlx::postgres::PgPoolOptions;
+use std::env;
 use serde::Serialize;
-use tower_http::cors::{Any, CorsLayer};
+
+mod handlers;
+mod models;
 
 #[derive(Serialize)]
 struct StatusServidor {
@@ -20,20 +23,24 @@ async fn health_check() -> Json<StatusServidor> {
 
 #[tokio::main]
 async fn main() {
-    // Configuración de permisos CORS para que Vue no sea bloqueado
-    let cors = CorsLayer::new()
-        .allow_origin(Any) // Permite conexiones desde cualquier IP local
-        .allow_methods(Any)
-        .allow_headers(Any);
-
-    // Definición de rutas (Endpoints)
-    let app = Router::new()
-        .route("/api/status", get(health_check))
-        .layer(cors);
-
-    let direccion = "0.0.0.0:3000";
-    println!("🚀 Backend en Rust inicializado en http://localhost:3000");
+    dotenvy::dotenv().ok();
     
-    let listener = tokio::net::TcpListener::bind(direccion).await.unwrap();
+    let db_url = env::var("DATABASE_URL")
+        .expect("La variable DATABASE_URL_ADMIN no se encontró en el archivo .env");
+
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await
+        .expect("No se pudo conectar a la base de datos de Neon");
+
+    let app = Router::new()
+        .route("/api/login", post(handlers::auth::login_usuario))
+        .route("/api/status", get(health_check))
+        .with_state(pool);
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    println!("🚀 Servidor backend escuchando en http://{}", listener.local_addr().unwrap());
+    
     axum::serve(listener, app).await.unwrap();
 }
