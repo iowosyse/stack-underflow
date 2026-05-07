@@ -220,8 +220,8 @@
                 <tr v-for="u in todosLosUsuarios" :key="u.id" class="ticket-row">
                   <td class="ps-4">
                     <div class="d-flex align-items-center gap-2">
-                      <div class="user-avatar user-avatar--sm" :style="{ background: avatarColor(u.fullName) }">
-                        {{ iniciales(u.fullName) }}
+                      <div class="user-avatar user-avatar--sm" :style="{ background: avatarColor(u.full_name) }">
+                        {{ iniciales(u.full_name) }}
                       </div>
                       <span class="text-capitalize td-sm nombre-usuario-fix">{{ u.fullName }}</span>
                     </div>
@@ -293,12 +293,35 @@ const ticketsActivos  = ref([])
 const ticketsCerrados = ref([])
 const todosLosUsuarios = ref([])
 
+const cargarUsuarios = async () => {
+  const token = localStorage.getItem('token');
+  
+  try {
+    const respuesta = await fetch('/api/usuarios', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`, // Enviamos la pulsera VIP
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (respuesta.ok) {
+      const datos = await respuesta.json();
+      // Si estás en SoporteView usa: listaUsuarios.value = datos
+      // Si estás en EjecutivoView usa: todosLosUsuarios.value = datos
+      todosLosUsuarios.value = datos; 
+    } else if (respuesta.status === 401) {
+      handleLogout(); // Si el token no sirve, fuera del sistema
+    }
+  } catch (error) {
+    console.error("Error al conectar con el servidor:", error);
+  }
+};
+
 onMounted(() => {
-  init()
-  // AQUI IREMOS AL BACKEND
-  // cargarTickets()
-  // cargarUsuarios()
-})
+  init();
+  cargarUsuarios();
+});
 
 const currentTab = ref('todos-tickets')
 const expandedTicket = ref(null)

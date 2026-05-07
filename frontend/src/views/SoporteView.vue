@@ -121,10 +121,10 @@
                 <div class="panel-section-header">Usuarios</div>
                 <div class="overflow-auto flex-grow-1 p-2">
                   <button v-for="u in listaUsuarios" :key="u.id" @click="usuarioSeleccionado = u; expandedTicket = null" :class="['user-card w-100', { 'user-card--active': usuarioSeleccionado?.id === u.id }]">
-                    <div class="user-avatar" :style="{ background: avatarColor(u.fullName) }">{{ iniciales(u.fullName) }}</div>
+                    <div class="user-avatar" :style="{ background: avatarColor(u.full_name) }">{{ iniciales(u.full_name) }}</div>
                     <div class="user-card-body">
                       <!-- Corrección de color de texto -->
-                      <div class="user-card-name text-capitalize">{{ u.fullName }}</div>
+                      <div class="user-card-name text-capitalize">{{ u.full_name }}</div>
                     </div>
                     <span class="user-card-arrow">›</span>
                   </button>
@@ -136,9 +136,9 @@
             <div class="col-8 d-flex flex-column" style="min-height: 0;">
               <div v-if="usuarioSeleccionado" class="panel-inner d-flex flex-column flex-grow-1" style="overflow: hidden;">
                 <div class="user-profile-bar">
-                  <div class="user-avatar user-avatar--lg" :style="{ background: avatarColor(usuarioSeleccionado.fullName) }">{{ iniciales(usuarioSeleccionado.fullName) }}</div>
+                  <div class="user-avatar user-avatar--lg" :style="{ background: avatarColor(usuarioSeleccionado.full_name) }">{{ iniciales(usuarioSeleccionado.full_name) }}</div>
                   <div class="flex-grow-1 min-w-0">
-                    <div class="user-detail-name text-capitalize">{{ usuarioSeleccionado.fullName }}</div>
+                    <div class="user-detail-name text-capitalize">{{ usuarioSeleccionado.full_name }}</div>
                     <div class="user-detail-role">{{ usuarioSeleccionado.role === 'administrador' ? 'Ejecutivo' : 'Usuario' }}</div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@
                   <table class="table table-borderless align-middle mb-0">
                     <thead><tr><th class="ps-4">ID</th><th>Asunto</th><th>Categoría</th><th>Estado</th></tr></thead>
                     <tbody>
-                      <tr v-if="ticketsDelUsuario(usuarioSeleccionado.fullName).length === 0"><td colspan="4" class="text-center py-5 opacity-55 td-sm">Sin tickets.</td></tr>
+                      <tr v-if="ticketsDelUsuario(usuarioSeleccionado.full_name).length === 0"><td colspan="4" class="text-center py-5 opacity-55 td-sm">Sin tickets.</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -185,11 +185,35 @@ const ticketsActivos  = ref([])
 const ticketsCerrados = ref([])
 const listaUsuarios   = ref([])
 
+const cargarUsuarios = async () => {
+  const token = localStorage.getItem('token');
+  
+  try {
+    const respuesta = await fetch('/api/usuarios', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`, // Enviamos la pulsera VIP
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (respuesta.ok) {
+      const datos = await respuesta.json();
+      // Si estás en SoporteView usa: listaUsuarios.value = datos
+      // Si estás en EjecutivoView usa: todosLosUsuarios.value = datos
+      listaUsuarios.value = datos; 
+    } else if (respuesta.status === 401) {
+      handleLogout(); // Si el token no sirve, fuera del sistema
+    }
+  } catch (error) {
+    console.error("Error al conectar con el servidor:", error);
+  }
+};
+
 onMounted(() => {
-  init()
-  // TODO: GET /api/tickets
-  // TODO: GET /api/usuarios
-})
+  init();
+  cargarUsuarios();
+});
 
 const currentTab = ref('dashboard')
 const usuarioSeleccionado = ref(null)
