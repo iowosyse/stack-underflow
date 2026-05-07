@@ -79,7 +79,7 @@ async fn main() {
         .route("/api/login", post(handlers::auth::login_handler))
         .route("/api/status", get(health_check))
         .route("/api/usuarios", get(handlers::users::obtener_directorio))
-        // .route("/api/tickets", post(handlers::tickets::crear_ticket))
+        .route("/api/tickets", post(handlers::tickets::crear_ticket))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

@@ -41,20 +41,25 @@
               <form @submit.prevent="submitTicket">
                 <div class="mb-3">
                   <label class="form-label">Asunto</label>
-                  <input type="text" class="form-control" v-model="subject" placeholder="Ej. No enciende la computadora">
+                  <input type="text" class="form-control" v-model="nuevoTicket.asunto" placeholder="Ej. No enciende la computadora">
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Categoría</label>
-                  <select class="form-select" v-model="category">
-                    <option>Hardware</option><option>Software</option><option>Redes</option>
+                  <select class="form-select" v-model="nuevoTicket.categoria">
+                    <option value="hardware">Soporte Técnico (Hardware)</option>
+                    <option value="software">Soporte Técnico (Software)</option>
+                    <option value="redes">Problemas de Red</option>
+                    <option value="cuenta">Problemas con mi Cuenta</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Descripción detallada</label>
-                  <textarea class="form-control" rows="3" v-model="description"></textarea>
+                  <textarea class="form-control" rows="3" v-model="nuevoTicket.descripcion"></textarea>
                 </div>
                 <div v-if="ticketSuccess" class="success-toast mb-3"><span class="text-accent fw-bold">✔</span> Ticket enviado.</div>
-                <button type="submit" class="btn btn-primary w-100 py-2" :disabled="!isFormValid">Enviar Ticket</button>
+                <button type="submit" class="btn btn-primary w-100 py-2" :disabled="!isFormValid || enviando">
+                  {{ enviando ? 'Enviando...' : 'Enviar Ticket' }}
+                </button>
               </form>
             </div>
           </div>
@@ -103,21 +108,62 @@ onMounted(() => {
   // TODO: GET /api/tickets?usuario_id=...
 })
 
-const subject = ref(''); const category = ref('Hardware'); const description = ref('')
-const ticketSuccess = ref(false)
+// ── Estado Local ─────────────────────────────────────────────────────────────
+const nuevoTicket = ref({
+  asunto: '',
+  categoria: 'hardware',
+  descripcion: ''
+});
 
-const nombreUsuario = computed(() => localStorage.getItem('usuario_nombre') || 'Usuario')
-const misTickets = computed(() => [...ticketsActivos.value, ...ticketsCerrados.value])
-const isFormValid = computed(() => subject.value.trim() !== '' && description.value.trim() !== '')
+const enviando = ref(false); // Nuestro interruptor de bloqueo
+const ticketSuccess = ref(false);
+
+const nombreUsuario = computed(() => localStorage.getItem('usuario_nombre') || 'Usuario');
+const misTickets = computed(() => [...ticketsActivos.value, ...ticketsCerrados.value]);
+
+// Arreglamos la validación para que apunte al objeto correcto
+const isFormValid = computed(() => nuevoTicket.value.asunto.trim() !== '' && nuevoTicket.value.descripcion.trim() !== '');
 
 // ── Acciones ─────────────────────────────────────────────────────────────────
 const submitTicket = async () => {
-  // TODO: POST /api/tickets
-  console.log("Levantar ticket", subject.value)
-  subject.value = ''; description.value = ''
-  ticketSuccess.value = true
-  setTimeout(() => ticketSuccess.value = false, 3500)
-}
+  enviando.value = true; // Bloquea el botón
+  ticketSuccess.value = false; // Oculta el mensaje de éxito por si había uno previo
+  const token = localStorage.getItem('token');
+  
+  try {
+    const respuesta = await fetch('/api/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      },
+      body: JSON.stringify({
+        asunto: nuevoTicket.value.asunto,
+        categoria: nuevoTicket.value.categoria,
+        descripcion: nuevoTicket.value.descripcion
+      })
+    });
+
+    if (respuesta.ok) {
+      ticketSuccess.value = true; // Mostramos el mensaje verde de éxito
+      
+      // Limpiar el formulario usando el valor real de tu BD ('hardware')
+      nuevoTicket.value = { asunto: '', categoria: 'hardware', descripcion: '' };
+      
+      // Opcional: Ocultar el mensaje de éxito después de 3 segundos
+      setTimeout(() => { ticketSuccess.value = false }, 3000);
+    } else {
+      const error = await respuesta.text();
+      console.error("Error del servidor:", error);
+      alert("Error al enviar el ticket. Revisa la consola.");
+    }
+  } catch (err) {
+    console.error("Error de conexión:", err);
+    alert("Error de conexión con el servidor.");
+  } finally {
+    enviando.value = false; // Desbloquea el botón siempre, falle o sea éxito
+  }
+};
 
 const logout = () => { localStorage.clear(); router.push('/') }
 const iniciales = (n) => n.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('')
@@ -128,6 +174,8 @@ const avatarColor = (n) => {
   let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) & 0xffff; return palette[h % palette.length] 
 }
 </script>
+
+
 <style scoped>
 .profile-text-fix { color: inherit; }
 [data-theme="dark"] .profile-text-fix { color: #f8f9fa; }
