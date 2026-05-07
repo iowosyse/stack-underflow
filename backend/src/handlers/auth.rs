@@ -49,14 +49,11 @@ pub async fn login_handler(
         Some(u) => {
             let nuevo_token = Uuid::new_v4().to_string();
 
-            sqlx::query!(
-                "UPDATE usuarios SET token = $1 WHERE id = $2",
-                nuevo_token,
-                u.id
-            )
-            .execute(&pool)
-            .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Error al guardar token: {}", e)))?;
+            sqlx::query!("UPDATE usuarios SET token = $1 WHERE email = $2 AND password_hash = $3", 
+                nuevo_token, payload.email, password_hasheada)
+                .execute(&pool) // Usa pool_auth
+                .await
+                .map_err(|e| (StatusCode::UNAUTHORIZED, "Error de credenciales".to_string()))?;
 
             Ok(Json(LoginResponse {
                 token: nuevo_token,
