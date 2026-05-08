@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE tickets\n        SET estado = 'resuelto'\n        WHERE id = $1\n          AND asignado_a_id = $2\n          AND estado = 'en_progreso'\n          AND activo = TRUE\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "df715c5de96462c1870c2773fb0adc4fea036408da8ce7c3310ca367b4258977"
+}

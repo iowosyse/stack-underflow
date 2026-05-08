@@ -231,8 +231,8 @@
                       {{ etiquetaRol(u.role) }}
                     </span>
                   </td>
-                  <td class="td-sm">{{ ticketsAbiertosDe(u.fullName) }}</td>
-                  <td class="td-sm">{{ ticketsCerradosDe(u.fullName) }}</td>
+                  <td class="td-sm">{{ ticketsAbiertosDe(u.full_name) }}</td>
+                  <td class="td-sm">{{ ticketsCerradosDe(u.full_name) }}</td>
                   <td class="text-end pe-4">
                     <button @click="abrirFormularioEditar(u)" class="btn btn-sm btn-outline-info btn-xs me-2">Editar</button>
                     <button @click="pedirConfirmacionEliminar(u)" class="btn btn-sm btn-outline-danger btn-xs">Eliminar</button>
@@ -318,9 +318,35 @@ const cargarUsuarios = async () => {
   }
 };
 
+const cargarTickets = async () => {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const [resActivos, resCerrados] = await Promise.all([
+      fetch('/api/tickets',          { headers }),
+      fetch('/api/tickets/cerrados', { headers }),
+    ]);
+
+    if (resActivos.status === 401 || resCerrados.status === 401) {
+      handleLogout();
+      return;
+    }
+
+    if (resActivos.ok)   ticketsActivos.value  = await resActivos.json();
+    if (resCerrados.ok)  ticketsCerrados.value = await resCerrados.json();
+  } catch (error) {
+    console.error('Error al cargar tickets:', error);
+  }
+};
+
 onMounted(() => {
   init();
   cargarUsuarios();
+  cargarTickets();
 });
 
 const currentTab = ref('todos-tickets')

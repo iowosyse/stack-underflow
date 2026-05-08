@@ -1,8 +1,9 @@
 use axum::{extract::State, http::StatusCode, response::Json};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
 use uuid::Uuid;
 use sha2::{Sha256, Digest};
+
+use crate::AppState;
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
@@ -18,7 +19,7 @@ pub struct LoginResponse {
 }
 
 pub async fn login_handler(
-    State(pool): State<PgPool>,
+    State(state): State<AppState>,
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, (StatusCode, String)> {
     
@@ -40,7 +41,7 @@ pub async fn login_handler(
         payload.email,
         password_hasheada //
     )
-    .fetch_optional(&pool)
+    .fetch_optional(&state.pool_auth)
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
@@ -51,7 +52,7 @@ pub async fn login_handler(
 
             sqlx::query!("UPDATE usuarios SET token = $1 WHERE email = $2 AND password_hash = $3", 
                 nuevo_token, payload.email, password_hasheada)
-                .execute(&pool) // Usa pool_auth
+                .execute(&state.pool_auth) // Usa pool_auth
                 .await
                 .map_err(|e| (StatusCode::UNAUTHORIZED, "Error de credenciales".to_string()))?;
 

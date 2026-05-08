@@ -74,7 +74,15 @@
                           <td class="ps-4"><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
                           <td class="td-sm text-capitalize">{{ t.author }}</td>
                           <td class="td-sm text-truncate" style="max-width: 160px;">{{ t.subject }}</td>
-                          <td class="pe-3 text-end"><button @click.stop="marcarComoHecho(t.id)" class="btn btn-sm btn-info fw-bold btn-xs">✔ Hecho</button></td>
+                          <td class="pe-3 text-end">
+                            <button 
+                              @click.stop="marcarComoHecho(t.id)" 
+                              :disabled="procesando"
+                              class="btn btn-sm btn-info fw-bold btn-xs"
+                            >
+                              {{ procesando ? '...' : '✔ Hecho' }}
+                            </button>
+                          </td>
                         </tr>
                       </template>
                       <tr v-if="misTicketsAsignados.length === 0"><td colspan="4" class="text-center py-5 opacity-55 td-sm">Sin tickets asignados.</td></tr>
@@ -100,7 +108,15 @@
                         <tr class="ticket-row">
                           <td class="ps-4"><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
                           <td class="td-sm"><div class="text-capitalize">{{ t.author }}</div><div class="td-stack-sub">{{ t.subject }}</div></td>
-                          <td class="pe-3 text-end"><button @click.stop="tomarTicket(t.id)" class="btn btn-sm btn-outline-info btn-xs">Tomar</button></td>
+                          <td class="pe-3 text-end">
+                            <button 
+                              @click.stop="tomarTicket(t.id)" 
+                              :disabled="procesando"
+                              class="btn btn-sm btn-outline-info btn-xs"
+                            >
+                              {{ procesando ? '...' : 'Tomar' }}
+                            </button>
+                          </td>
                         </tr>
                       </template>
                       <tr v-if="colaSinAsignarFiltrada.length === 0"><td colspan="3" class="text-center py-5 opacity-55 td-sm">Cola vacía.</td></tr>
@@ -146,7 +162,17 @@
                   <table class="table table-borderless align-middle mb-0">
                     <thead><tr><th class="ps-4">ID</th><th>Asunto</th><th>Categoría</th><th>Estado</th></tr></thead>
                     <tbody>
-                      <tr v-if="ticketsDelUsuario(usuarioSeleccionado.full_name).length === 0"><td colspan="4" class="text-center py-5 opacity-55 td-sm">Sin tickets.</td></tr>
+                      <template v-for="t in ticketsDelUsuario(usuarioSeleccionado.full_name)" :key="t.id">
+                        <tr class="ticket-row">
+                          <td class="ps-4 col-id">{{ t.id }}</td>
+                          <td class="td-sm text-truncate" style="max-width: 200px;">{{ t.subject }}</td>
+                          <td><span class="cat-pill">{{ t.category }}</span></td>
+                          <td><span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">{{ t.status }}</span></td>
+                        </tr>
+                      </template>
+                      <tr v-if="ticketsDelUsuario(usuarioSeleccionado.full_name).length === 0">
+                        <td colspan="4" class="text-center py-5 opacity-55 td-sm">Sin tickets.</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -162,7 +188,20 @@
           <div class="panel-inner">
             <table class="table table-borderless align-middle mb-0">
               <thead><tr><th class="ps-4">ID</th><th>Solicitante</th><th>Asunto</th><th>Categoría</th><th>Estado</th></tr></thead>
-              <tbody><tr v-if="ticketsCerrados.length === 0"><td colspan="5" class="text-center py-5 opacity-55 td-sm">Aún no hay tickets resueltos.</td></tr></tbody>
+              <tbody>
+                <template v-for="t in ticketsCerrados" :key="t.id">
+                  <tr class="ticket-row">
+                    <td class="ps-4 col-id">{{ t.id }}</td>
+                    <td class="td-sm text-capitalize">{{ t.author }}</td>
+                    <td class="td-sm text-truncate" style="max-width: 180px;">{{ t.subject }}</td>
+                    <td><span class="cat-pill">{{ t.category }}</span></td>
+                    <td><span class="badge badge-hecho">resuelto</span></td>
+                  </tr>
+                </template>
+                <tr v-if="ticketsCerrados.length === 0">
+                  <td colspan="5" class="text-center py-5 opacity-55 td-sm">Aún no hay tickets resueltos.</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </section>
@@ -210,9 +249,29 @@ const cargarUsuarios = async () => {
   }
 };
 
+const cargarTickets = async () => {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+  try {
+    const [resActivos, resCerrados] = await Promise.all([
+      fetch('/api/tickets',          { headers }),
+      fetch('/api/tickets/cerrados', { headers }),
+    ]);
+    if (resActivos.status === 401 || resCerrados.status === 401) { handleLogout(); return; }
+    if (resActivos.ok)  ticketsActivos.value  = await resActivos.json();
+    if (resCerrados.ok) ticketsCerrados.value = await resCerrados.json();
+  } catch (error) {
+    console.error('Error al cargar tickets:', error);
+  }
+};
+
 onMounted(() => {
   init();
   cargarUsuarios();
+  cargarTickets();
 });
 
 const currentTab = ref('dashboard')
@@ -235,16 +294,64 @@ const totalPendiente = computed(() => misTicketsAsignados.value.length + tickets
 
 const ticketsDelUsuario = (n) => [...ticketsActivos.value, ...ticketsCerrados.value].filter(t => t.author === n)
 
-// ── Acciones (Endpoints) ───────────────────────────────────────────────────
+// Variable para bloquear clics dobles durante la carga
+const procesando = ref(false);
+
 const tomarTicket = async (id) => {
-  // TODO: PUT /api/tickets/:id/asignar
-  console.log("Asignar ticket", id)
-}
+  if (procesando.value) return;
+  procesando.value = true;
+  
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`/api/tickets/${id}/asignar`, {
+      method: 'PUT',
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      // Recargamos los tickets para que aparezca en "Mis Tickets"
+      await cargarTickets();
+    } else {
+      const errorText = await res.text();
+      alert(`No se pudo tomar el ticket: ${errorText}`);
+    }
+  } catch (e) {
+    console.error('Error de conexión:', e);
+  } finally {
+    procesando.value = false;
+  }
+};
 
 const marcarComoHecho = async (id) => {
-  // TODO: PUT /api/tickets/:id/cerrar
-  console.log("Cerrar ticket", id)
-}
+  if (procesando.value) return;
+  procesando.value = true;
+
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch(`/api/tickets/${id}/cerrar`, {
+      method: 'PUT',
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      // Recargamos para que el ticket se mueva a la pestaña de "Resueltos"
+      await cargarTickets();
+    } else {
+      const errorText = await res.text();
+      alert(`Error al cerrar: ${errorText}`);
+    }
+  } catch (e) {
+    console.error('Error de conexión:', e);
+  } finally {
+    procesando.value = false;
+  }
+};
 
 const handleLogout = () => { localStorage.clear(); router.push('/') }
 const toggleTicket = (id) => { expandedTicket.value = expandedTicket.value === id ? null : id }

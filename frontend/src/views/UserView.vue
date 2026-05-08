@@ -103,9 +103,34 @@ const { isDark, toggle, init } = useTheme()
 const ticketsActivos = ref([])
 const ticketsCerrados = ref([])
 
+const cargarTickets = async () => {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const [resActivos, resCerrados] = await Promise.all([
+      fetch('/api/tickets',          { headers }),
+      fetch('/api/tickets/cerrados', { headers }),
+    ]);
+
+    if (resActivos.status === 401 || resCerrados.status === 401) {
+      logout();
+      return;
+    }
+
+    if (resActivos.ok)   ticketsActivos.value  = await resActivos.json();
+    if (resCerrados.ok)  ticketsCerrados.value = await resCerrados.json();
+  } catch (error) {
+    console.error('Error al cargar tickets:', error);
+  }
+};
+
 onMounted(() => {
   init()
-  // TODO: GET /api/tickets?usuario_id=...
+  cargarTickets()
 })
 
 // ── Estado Local ─────────────────────────────────────────────────────────────
@@ -145,12 +170,9 @@ const submitTicket = async () => {
     });
 
     if (respuesta.ok) {
-      ticketSuccess.value = true; // Mostramos el mensaje verde de éxito
-      
-      // Limpiar el formulario usando el valor real de tu BD ('hardware')
+      ticketSuccess.value = true;
       nuevoTicket.value = { asunto: '', categoria: 'hardware', descripcion: '' };
-      
-      // Opcional: Ocultar el mensaje de éxito después de 3 segundos
+      await cargarTickets(); // Refleja el ticket nuevo en la lista inmediatamente
       setTimeout(() => { ticketSuccess.value = false }, 3000);
     } else {
       const error = await respuesta.text();
