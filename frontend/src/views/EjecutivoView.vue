@@ -196,7 +196,7 @@
             <div class="modal-confirm glass-admin p-4">
               <h5 class="fw-bold mb-3 text-accent">Confirmar Eliminación</h5>
               <p class="mb-4 opacity-75">
-                ¿Eliminar permanentemente a <strong class="text-capitalize">{{ usuarioAEliminar.fullName }}</strong>?
+                ¿Eliminar permanentemente a <strong class="text-capitalize">{{ usuarioAEliminar.full_name }}</strong>?
               </p>
               <div class="d-flex gap-3 justify-content-end">
                 <button @click="usuarioAEliminar = null" class="btn btn-outline-light">Cancelar</button>
@@ -223,7 +223,7 @@
                       <div class="user-avatar user-avatar--sm" :style="{ background: avatarColor(u.full_name) }">
                         {{ iniciales(u.full_name) }}
                       </div>
-                      <span class="text-capitalize td-sm nombre-usuario-fix">{{ u.fullName }}</span>
+                      <span class="text-capitalize td-sm user-card-name">{{ u.full_name }}</span>
                     </div>
                   </td>
                   <td>
@@ -368,7 +368,7 @@ const abrirFormularioCrear = () => {
 
 const abrirFormularioEditar = (u) => {
   modoEdicion.value = true; usuarioEnEdicion.value = u
-  formNombre.value = u.fullName; formEmail.value = u.email ?? ''; formRol.value = u.role
+  formNombre.value = u.full_name; formEmail.value = u.email ?? ''; formRol.value = u.role
   mostrarFormulario.value = true
 }
 
@@ -425,7 +425,7 @@ const avatarColor = (n) => {
 .modal-confirm { max-width: 420px; width: 100%; border-radius: 16px; }
 .cat-pill--admin { background: rgba(139, 47, 201, 0.15); color: #c084fc; }
 .user-avatar--sm { width: 30px; height: 30px; min-width: 30px; font-size: 0.7rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
-/* Corrección de color de texto en modo oscuro */
-.nombre-usuario-fix { color: inherit; }
-[data-theme="dark"] .nombre-usuario-fix { color: #f8f9fa; }
+/* Corrección de color de texto responsivo al tema (igual que SoporteView) */
+.user-card-name { color: #212529; font-weight: 500; }
+[data-theme="dark"] .user-card-name { color: #f8f9fa; }
 </style>
