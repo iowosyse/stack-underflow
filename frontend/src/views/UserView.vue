@@ -82,7 +82,19 @@
           <table class="table table-borderless align-middle mb-0">
             <thead><tr><th class="ps-4">ID</th><th>Asunto</th><th>Categoría</th><th>Estado</th></tr></thead>
             <tbody>
-              <tr v-if="misTickets.length === 0"><td colspan="4" class="text-center py-5 opacity-55 td-sm">No has levantado tickets aún.</td></tr>
+              <template v-for="t in misTickets" :key="t.id">
+                <tr class="ticket-row">
+                  <td class="ps-4 col-id">{{ t.id }}</td>
+                  <td class="td-sm text-truncate" style="max-width: 220px;">{{ t.subject }}</td>
+                  <td class="td-sm text-capitalize">{{ t.category }}</td>
+                  <td>
+                    <span :class="['badge', `badge-${t.status}`]">{{ t.status }}</span>
+                  </td>
+                </tr>
+              </template>
+              <tr v-if="misTickets.length === 0">
+                <td colspan="4" class="text-center py-5 opacity-55 td-sm">No has levantado tickets aún.</td>
+              </tr>
             </tbody>
           </table>
         </div>
