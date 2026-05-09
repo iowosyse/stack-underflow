@@ -46,6 +46,7 @@ pub async fn obtener_directorio(
         r#"
         SELECT id, nombre as "full_name!", rol::text as "role!", email 
         FROM usuarios 
+        WHERE activo = TRUE
         ORDER BY nombre ASC
         "#
     )
