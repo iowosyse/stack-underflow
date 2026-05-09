@@ -2,7 +2,6 @@
   <div class="d-flex flex-column vh-100 admin-bg">
     <div class="d-flex flex-grow-1 overflow-hidden p-3 gap-3">
 
-      <!-- SIDEBAR -->
       <aside class="glass-admin d-flex flex-column flex-shrink-0" style="width: 256px;">
         <div class="sidebar-header">
           <div class="logo sidebar-logo text-accent">SYS_ADMIN</div>
@@ -32,10 +31,8 @@
         </div>
       </aside>
 
-      <!-- ÁREA DE CONTENIDO -->
       <main class="glass-admin d-flex flex-column overflow-auto w-100 content-main">
 
-        <!-- TODOS LOS TICKETS -->
         <section v-if="currentTab === 'todos-tickets'">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h4 fw-bold mb-0">Todos los Tickets</h2>
@@ -56,7 +53,6 @@
             </div>
           </div>
 
-          <!-- Métricas rápidas -->
           <div class="row g-3 mb-4">
             <div class="col-3">
               <div class="metric-card">
@@ -84,18 +80,11 @@
             </div>
           </div>
 
-          <!-- Tabla global de tickets -->
           <div class="panel-inner">
             <table class="table table-borderless align-middle mb-0">
               <thead>
                 <tr>
-                  <th class="ps-4">ID</th>
-                  <th>Solicitante</th>
-                  <th>Asunto</th>
-                  <th>Categoría</th>
-                  <th>Prioridad</th>
-                  <th>Estado</th>
-                  <th>Asignado a</th>
+                  <th class="ps-4">ID</th><th>Solicitante</th><th>Asunto</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Asignado a</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,11 +95,7 @@
                     <td class="td-sm text-truncate" style="max-width: 180px;">{{ t.subject }}</td>
                     <td><span class="cat-pill">{{ t.category }}</span></td>
                     <td><span :class="['badge', `badge-${t.priority}`]">{{ t.priority }}</span></td>
-                    <td>
-                      <span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">
-                        {{ t.status }}
-                      </span>
-                    </td>
+                    <td><span :class="['badge', t.status === 'hecho' ? 'badge-hecho' : 'badge-open']">{{ t.status }}</span></td>
                     <td class="td-sm text-capitalize">{{ t.assignedTo ?? '—' }}</td>
                   </tr>
                   <tr v-if="expandedTicket === t.id" class="expand-row">
@@ -126,7 +111,6 @@
                   </tr>
                 </template>
                 
-                <!-- Tickets Cerrados -->
                 <template v-if="filtroEstado === 'todos' || filtroEstado === 'hecho'">
                   <template v-for="t in ticketsCerrados" :key="'closed-'+t.id">
                     <tr @click="toggleTicket('closed-'+t.id)" class="ticket-row">
@@ -157,7 +141,6 @@
           </div>
         </section>
 
-        <!-- GESTIÓN DE USUARIOS (CRUD) -->
         <section v-if="currentTab === 'usuarios'" class="d-flex flex-column h-100">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h4 fw-bold mb-0">Gestión de Usuarios</h2>
@@ -166,46 +149,52 @@
             </button>
           </div>
 
-          <div v-if="mostrarFormulario" class="panel-inner p-4 mb-4">
-            <h3 class="h6 fw-bold mb-3">{{ modoEdicion ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}</h3>
-            <div class="row g-3">
-              <div class="col-6">
-                <label class="form-label">Nombre Completo</label>
-                <input type="text" class="form-control" v-model="formNombre" placeholder="Ej. Juan Pérez Gómez">
-              </div>
-              <div class="col-6">
-                <label class="form-label">Correo Corporativo</label>
-                <input type="email" class="form-control" v-model="formEmail" placeholder="juan.perez@empresa.com">
-              </div>
-              <div class="col-4">
-                <label class="form-label">Rol</label>
-                <select class="form-select" v-model="formRol">
-                  <option value="cliente">Usuario (cliente)</option>
-                  <option value="soporte">Técnico de Soporte</option>
-                  <option value="administrador">Ejecutivo (admin)</option>
-                </select>
-              </div>
-              <div class="col-12 d-flex gap-2 justify-content-end">
-                <button @click="cancelarFormulario" class="btn btn-outline-light">Cancelar</button>
-                <button @click="guardarUsuario" class="btn btn-primary fw-bold">
-                  {{ modoEdicion ? 'Guardar Cambios' : 'Registrar Usuario' }}
-                </button>
+          <Teleport to="body">
+            <div v-if="mostrarFormularioEdit" class="modal-overlay" @click.self="cancelarEdicion" @keydown="handleKeydownEdit">
+              <div class="modal-confirm glass-admin p-4" ref="modalEditRef" style="max-width: 500px;">
+                <h5 class="fw-bold mb-4 text-accent">Editar Usuario</h5>
+                <form @submit.prevent="guardarEdicion">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Nombre Completo</label>
+                      <input type="text" class="form-control" v-model="formNombre" required ref="firstEditInputRef">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Correo Corporativo</label>
+                      <input type="email" class="form-control" v-model="formEmail" required>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Rol del Sistema</label>
+                      <select class="form-select" v-model="formRol">
+                        <option value="cliente">Usuario Regular (Cliente)</option>
+                        <option value="soporte">Técnico de Soporte</option>
+                        <option value="administrador">Ejecutivo (Admin)</option>
+                      </select>
+                    </div>
+                    <div class="col-12 d-flex gap-3 justify-content-end mt-4">
+                      <button type="button" @click="cancelarEdicion" class="btn btn-outline-light">Cancelar</button>
+                      <button type="submit" class="btn btn-primary fw-bold">Guardar Cambios</button>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
-          </div>
+          </Teleport>
 
-          <div v-if="usuarioAEliminar" class="modal-overlay" @click.self="usuarioAEliminar = null">
-            <div class="modal-confirm glass-admin p-4">
-              <h5 class="fw-bold mb-3 text-accent">Confirmar Eliminación</h5>
-              <p class="mb-4 opacity-75">
-                ¿Eliminar permanentemente a <strong class="text-capitalize">{{ usuarioAEliminar.full_name }}</strong>?
-              </p>
-              <div class="d-flex gap-3 justify-content-end">
-                <button @click="usuarioAEliminar = null" class="btn btn-outline-light">Cancelar</button>
-                <button @click="confirmarEliminar" class="btn btn-danger fw-bold">Eliminar</button>
+          <Teleport to="body">
+            <div v-if="usuarioAEliminar" class="modal-overlay" @click.self="cancelarEliminacion" @keydown="handleKeydownDel">
+              <div class="modal-confirm glass-admin p-4" ref="modalDelRef">
+                <h5 class="fw-bold mb-3 text-accent">Confirmar Eliminación</h5>
+                <p class="mb-4 opacity-75">
+                  ¿Desactivar permanentemente a <strong class="text-capitalize">{{ usuarioAEliminar.full_name }}</strong>?
+                </p>
+                <div class="d-flex gap-3 justify-content-end">
+                  <button type="button" @click="cancelarEliminacion" class="btn btn-outline-light" ref="firstDelBtnRef">Cancelar</button>
+                  <button type="button" @click="confirmarEliminar" class="btn btn-danger fw-bold">Eliminar</button>
+                </div>
               </div>
             </div>
-          </div>
+          </Teleport>
 
           <div class="panel-inner flex-grow-1">
             <table class="table table-borderless align-middle mb-0">
@@ -248,7 +237,6 @@
           </div>
         </section>
 
-        <!-- NUEVO TICKET -->
         <section v-if="currentTab === 'nuevo-ticket'" class="d-flex flex-column align-items-center">
           <div class="new-user-container mx-auto w-100" style="max-width: 640px;">
             <h2 class="h4 fw-bold mb-4">Levantar Ticket</h2>
@@ -283,86 +271,47 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTheme } from '../composables/useTheme'
 
 const router = useRouter()
 const { isDark, toggle, init } = useTheme()
 
-// ── Estado Local (Reemplaza a store.js) ──────────────────────────────────────
+// ── Estado Local ──────────────────────────────────────
 const ticketsActivos  = ref([])
 const ticketsCerrados = ref([])
 const todosLosUsuarios = ref([])
 
 const cargarUsuarios = async () => {
   const token = localStorage.getItem('token');
-  
   try {
-    const respuesta = await fetch('/api/usuarios', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`, // Enviamos la pulsera VIP
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (respuesta.ok) {
-      const datos = await respuesta.json();
-      // Si estás en SoporteView usa: listaUsuarios.value = datos
-      // Si estás en EjecutivoView usa: todosLosUsuarios.value = datos
-      todosLosUsuarios.value = datos; 
-    } else if (respuesta.status === 401) {
-      handleLogout(); // Si el token no sirve, fuera del sistema
-    }
-  } catch (error) {
-    console.error("Error al conectar con el servidor:", error);
-  }
+    const respuesta = await fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+    if (respuesta.ok) todosLosUsuarios.value = await respuesta.json();
+    else if (respuesta.status === 401) handleLogout();
+  } catch (error) { console.error("Error al conectar con el servidor:", error); }
 };
 
 const cargarTickets = async () => {
   const token = localStorage.getItem('token');
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   try {
     const [resActivos, resCerrados] = await Promise.all([
-      fetch('/api/tickets',          { headers }),
+      fetch('/api/tickets', { headers }),
       fetch('/api/tickets/cerrados', { headers }),
     ]);
-
-    if (resActivos.status === 401 || resCerrados.status === 401) {
-      handleLogout();
-      return;
-    }
-
-    if (resActivos.ok)   ticketsActivos.value  = await resActivos.json();
-    if (resCerrados.ok)  ticketsCerrados.value = await resCerrados.json();
-  } catch (error) {
-    console.error('Error al cargar tickets:', error);
-  }
+    if (resActivos.status === 401 || resCerrados.status === 401) { handleLogout(); return; }
+    if (resActivos.ok) ticketsActivos.value = await resActivos.json();
+    if (resCerrados.ok) ticketsCerrados.value = await resCerrados.json();
+  } catch (error) { console.error('Error al cargar tickets:', error); }
 };
 
-onMounted(() => {
-  init();
-  cargarUsuarios();
-  cargarTickets();
-});
+onMounted(() => { init(); cargarUsuarios(); cargarTickets(); });
 
 const currentTab = ref('todos-tickets')
 const expandedTicket = ref(null)
 const filtroEstado = ref('todos')
 const filtroPrioridad = ref('todas')
-
-const mostrarFormulario = ref(false)
-const modoEdicion = ref(false)
-const usuarioEnEdicion = ref(null)
-const formNombre = ref('')
-const formEmail = ref('')
-const formRol = ref('cliente') 
-const usuarioAEliminar = ref(null)
 
 const ticketAsunto = ref('')
 const ticketCategoria = ref('Hardware')
@@ -374,87 +323,92 @@ const todosLosTickets = computed(() => ticketsActivos.value)
 
 const ticketsFiltrados = computed(() => {
   let lista = ticketsActivos.value
-  if (filtroEstado.value !== 'todos' && filtroEstado.value !== 'hecho')
-    lista = lista.filter(t => t.status === filtroEstado.value)
-  if (filtroPrioridad.value !== 'todas')
-    lista = lista.filter(t => t.priority === filtroPrioridad.value)
+  if (filtroEstado.value !== 'todos' && filtroEstado.value !== 'hecho') lista = lista.filter(t => t.status === filtroEstado.value)
+  if (filtroPrioridad.value !== 'todas') lista = lista.filter(t => t.priority === filtroPrioridad.value)
   return lista
 })
 
 const urgentesTotal = computed(() => ticketsActivos.value.filter(t => t.priority === 'urgente').length)
 const sinAsignarTotal = computed(() => ticketsActivos.value.filter(t => t.status === 'disponible').length)
-
 const ticketsAbiertosDe = (n) => ticketsActivos.value.filter(t => t.author === n).length
 const ticketsCerradosDe = (n) => ticketsCerrados.value.filter(t => t.author === n).length
 
-// ── CRUD Acciones (Endpoints Pendientes) ───────────────────────────────────
+// ── Modales de Usuarios y Focus Trap ───────────────────────────────────
+const mostrarFormularioEdit = ref(false)
+const usuarioEnEdicion = ref(null)
+const formNombre = ref('')
+const formEmail = ref('')
+const formRol = ref('cliente') 
+const usuarioAEliminar = ref(null)
 
-// ── CRUD Acciones ──────────────────────────────────────────────────────────
-const abrirFormularioCrear = () => {
-  router.push('/soporte/nuevo-usuario') 
-}
+const modalEditRef = ref(null)
+const firstEditInputRef = ref(null)
+const modalDelRef = ref(null)
+const firstDelBtnRef = ref(null)
 
-const abrirFormularioEditar = (u) => {
-  modoEdicion.value = true; usuarioEnEdicion.value = u
-  formNombre.value = u.full_name; formEmail.value = u.email ?? ''; formRol.value = u.role
-  mostrarFormulario.value = true
-}
+const trapFocus = (e, modalElement, closeAction) => {
+  if (e.key === 'Escape') { closeAction(); return; }
+  if (e.key !== 'Tab') return;
+  if (!modalElement) return;
 
-const cancelarFormulario = () => { mostrarFormulario.value = false; usuarioEnEdicion.value = null }
+  const focusable = modalElement.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (!focusable.length) return;
 
-const guardarUsuario = async () => {
-  if (!formNombre.value.trim()) return
-  const token = localStorage.getItem('token')
-  
-  try {
-    if (modoEdicion.value) {
-      // PUT: Editar usuario existente
-      const res = await fetch(`/api/usuarios/${usuarioEnEdicion.value.id}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: formNombre.value, email: formEmail.value, role: formRol.value })
-      })
-      if (res.ok) await cargarUsuarios()
-    } else {
-      // POST: Crear nuevo usuario
-      let emailFinal = formEmail.value
-      let pwdFinal = "12345"
-      
-      // Si el ejecutivo no llenó el correo, lo generamos en automático
-      if (!emailFinal) {
-        const partes = formNombre.value.trim().split(' ')
-        emailFinal = `${partes[0].toLowerCase()}.${(partes.slice(1).join('').toLowerCase() || '12345')}@tecnm.mx`
-        pwdFinal = partes.slice(1).join(' ') || '12345'
-      }
+  const firstElement = focusable[0];
+  const lastElement = focusable[focusable.length - 1];
 
-      const res = await fetch('/api/usuarios', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: formNombre.value, email: emailFinal, role: formRol.value, password: pwdFinal })
-      })
-      if (res.ok) await cargarUsuarios()
-    }
-  } catch (e) {
-    console.error("Error al guardar usuario:", e)
+  if (e.shiftKey) { 
+    if (document.activeElement === firstElement) { lastElement.focus(); e.preventDefault(); }
+  } else { 
+    if (document.activeElement === lastElement) { firstElement.focus(); e.preventDefault(); }
   }
-  cancelarFormulario()
 }
 
-const pedirConfirmacionEliminar = (u) => { usuarioAEliminar.value = u }
+const handleKeydownEdit = (e) => trapFocus(e, modalEditRef.value, cancelarEdicion)
+const handleKeydownDel = (e) => trapFocus(e, modalDelRef.value, cancelarEliminacion)
+
+const abrirFormularioEditar = async (u) => {
+  usuarioEnEdicion.value = u
+  formNombre.value = u.full_name; formEmail.value = u.email ?? ''; formRol.value = u.role
+  mostrarFormularioEdit.value = true
+  
+  await nextTick()
+  if (firstEditInputRef.value) firstEditInputRef.value.focus()
+}
+
+const cancelarEdicion = () => { mostrarFormularioEdit.value = false; usuarioEnEdicion.value = null }
+
+const guardarEdicion = async () => {
+  const token = localStorage.getItem('token')
+  try {
+    const res = await fetch(`/api/usuarios/${usuarioEnEdicion.value.id}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ full_name: formNombre.value, email: formEmail.value, role: formRol.value })
+    })
+    if (res.ok) await cargarUsuarios()
+  } catch (e) { console.error("Error al guardar usuario:", e) }
+  cancelarEdicion()
+}
+
+const pedirConfirmacionEliminar = async (u) => { 
+  usuarioAEliminar.value = u 
+  await nextTick()
+  if (firstDelBtnRef.value) firstDelBtnRef.value.focus()
+}
+
+const cancelarEliminacion = () => { usuarioAEliminar.value = null }
 
 const confirmarEliminar = async () => {
   if (!usuarioAEliminar.value) return
   const token = localStorage.getItem('token')
-  
   try {
-    const res = await fetch(`/api/usuarios/${usuarioAEliminar.value.id}`, {
-      method: 'DELETE',
+    const res = await fetch(`/api/usuarios/${usuarioAEliminar.value.id}/desactivar`, {
+      method: 'PATCH',
       headers: { 'Authorization': `Bearer ${token}` }
     })
     if (res.ok) await cargarUsuarios()
-  } catch (e) {
-    console.error("Error al eliminar usuario:", e)
-  }
+  } catch (e) { console.error("Error al eliminar usuario:", e) }
   usuarioAEliminar.value = null
 }
 
@@ -462,35 +416,31 @@ const ticketFormValido = computed(() => ticketAsunto.value.trim() !== '' && tick
 
 const enviarTicket = async () => {
   const token = localStorage.getItem('token')
-  
-  // Transformamos el valor visual ("Hardware") al formato ENUM ("hardware")
   const categoriaNormalizada = ticketCategoria.value.toLowerCase()
 
   try {
     const res = await fetch('/api/tickets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({
-        asunto: ticketAsunto.value,
-        categoria: categoriaNormalizada,
-        descripcion: ticketDescripcion.value
-      })
+      body: JSON.stringify({ asunto: ticketAsunto.value, categoria: categoriaNormalizada, descripcion: ticketDescripcion.value })
     })
 
     if (res.ok) {
       ticketAsunto.value = ''; ticketDescripcion.value = ''
       ticketExitoso.value = true
-      await cargarTickets() // Refresca la tabla en vivo
+      await cargarTickets()
       setTimeout(() => (ticketExitoso.value = false), 3500)
-    } else {
-      alert("Error al levantar el ticket. Revisa la consola.")
     }
-  } catch (e) {
-    console.error("Error de conexión:", e)
-  }
+  } catch (e) { console.error("Error de conexión:", e) }
 }
 
-const handleLogout = () => { localStorage.clear(); router.push('/') }
+const handleLogout = async () => {
+  const token = localStorage.getItem('token')
+  if (token) { await fetch('/api/logout', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }).catch(() => {}) }
+  localStorage.clear()
+  router.push('/')
+}
+
 const toggleTicket = (id) => { expandedTicket.value = expandedTicket.value === id ? null : id }
 const fmtDate = (ts) => new Date(ts).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
 const etiquetaRol = (r) => ({ administrador: 'Ejecutivo', soporte: 'Soporte IT', cliente: 'Usuario' }[r] ?? r)
@@ -510,7 +460,6 @@ const avatarColor = (n) => {
 .modal-confirm { max-width: 420px; width: 100%; border-radius: 16px; }
 .cat-pill--admin { background: rgba(139, 47, 201, 0.15); color: #c084fc; }
 .user-avatar--sm { width: 30px; height: 30px; min-width: 30px; font-size: 0.7rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
-/* Corrección de color de texto responsivo al tema (igual que SoporteView) */
 .user-card-name { color: #212529; font-weight: 500; }
 [data-theme="dark"] .user-card-name { color: #f8f9fa; }
 </style>

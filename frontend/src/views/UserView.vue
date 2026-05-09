@@ -199,7 +199,17 @@ const submitTicket = async () => {
   }
 };
 
-const logout = () => { localStorage.clear(); router.push('/') }
+const logout = async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    await fetch('/api/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).catch(() => {})
+  }
+  localStorage.clear()
+  router.push('/')
+}
 const iniciales = (n) => n.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('')
 const avatarColor = (n) => { 
   const pLight = ['#4db6ac','#7986cb','#9575cd','#e57373','#f06292','#64b5f6','#4dd0e1','#81c784','#dce775','#ffb74d']

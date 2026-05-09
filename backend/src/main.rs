@@ -83,16 +83,13 @@ async fn main() {
 
     let app = Router::new()
         .route("/api/login", post(handlers::auth::login_handler))
+        .route("/api/logout", post(handlers::auth::logout_handler))
         .route("/api/status", get(health_check))
         
-        // ─── RUTAS DE USUARIOS (¡Aquí está la magia!) ───
-        // Encadenamos el GET y el POST en la misma ruta
         .route("/api/usuarios", get(handlers::users::obtener_directorio).post(handlers::users::crear_usuario))
-        // Agregamos las rutas para editar (PUT) y desactivar (PATCH)
         .route("/api/usuarios/{id}", put(handlers::users::editar_usuario))
         .route("/api/usuarios/{id}/desactivar", patch(handlers::users::eliminar_usuario))
         
-        // ─── RUTAS DE TICKETS (estas se quedan igual) ───
         .route("/api/tickets", get(handlers::tickets::obtener_tickets_activos).post(handlers::tickets::crear_ticket))
         .route("/api/tickets/cerrados", get(handlers::tickets::obtener_tickets_cerrados))
         .route("/api/tickets/{id}/asignar", put(handlers::tickets::tomar_ticket))

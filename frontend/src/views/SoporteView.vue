@@ -353,7 +353,17 @@ const marcarComoHecho = async (id) => {
   }
 };
 
-const handleLogout = () => { localStorage.clear(); router.push('/') }
+const handleLogout = async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    await fetch('/api/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).catch(() => {})
+  }
+  localStorage.clear()
+  router.push('/')
+}
 const toggleTicket = (id) => { expandedTicket.value = expandedTicket.value === id ? null : id }
 const fmtDate = (ts) => new Date(ts).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })
 

@@ -44,18 +44,25 @@
                 </div>
               </div>
 
-              <div class="mb-4">
+              <div class="mb-4 position-relative">
                 <label class="form-label">Correo Electrónico Institucional</label>
-                <input type="email" class="form-control" v-model="form.email" placeholder="usuario@tecnm.mx" required>
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  v-model="form.email" 
+                  @input="validarCorreoEntrada"
+                  placeholder="usuario@morelia.tecnm.mx" 
+                  required
+                >
+                <div v-if="estadoCorreo !== 'idle'" :class="['mt-2 text-sm fw-bold transition-colors', claseColorCorreo]">
+                  {{ mensajeCorreo }}
+                </div>
               </div>
 
               <div class="row g-3 mb-5">
                 <div class="col-6">
                   <label class="form-label">Contraseña Temporal</label>
                   <input type="password" class="form-control" v-model="form.password" placeholder="Contraseña inicial" required>
-                  <div class="form-text mt-2 opacity-75" style="font-size: 0.8rem;">
-                    *El sistema pondrá la primera letra en mayúscula automáticamente.
-                  </div>
                 </div>
                 <div class="col-6">
                   <label class="form-label">Rol del Sistema</label>
@@ -67,7 +74,13 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Guardar Usuario</button>
+              <button 
+                type="submit" 
+                class="btn btn-primary w-100 py-3 fw-bold rounded-pill"
+                :disabled="estadoCorreo !== 'available'"
+              >
+                Guardar Usuario
+              </button>
             </form>
           </div>
         </div>
@@ -84,7 +97,6 @@ import { useTheme } from '../composables/useTheme'
 const router = useRouter()
 const { isDark, toggle, init } = useTheme()
 
-// Variables reactivas del formulario
 const form = ref({
   nombres: '',
   apellidos: '',
@@ -98,24 +110,74 @@ onMounted(() => init())
 const nombreUsuario = computed(() => localStorage.getItem('usuario_nombre') || 'Usuario')
 const rolActual = computed(() => localStorage.getItem('rol'))
 
-// Lógica de UI para que el menú se adapte a Ejecutivo o Soporte
 const panelRuta = computed(() => rolActual.value === 'administrador' ? '/ejecutivo' : '/soporte')
 const panelNombre = computed(() => rolActual.value === 'administrador' ? 'SYS_ADMIN' : 'IT_SOPORTE')
 
-const crearUsuario = async () => {
-  const nombreCompleto = `${form.value.nombres.trim()} ${form.value.apellidos.trim()}`;
-  
-  const passParaBackend = form.value.password.trim(); 
+// ── LÓGICA DE VALIDACIÓN AJAX + REGEX ──
+const estadoCorreo = ref('idle') // 'idle' | 'invalid' | 'checking' | 'available' | 'taken'
+let timeoutValidacion = null
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const validarCorreoEntrada = () => {
+  const emailActual = form.value.email.trim().toLowerCase()
+  
+  if (!emailActual) { estadoCorreo.value = 'idle'; return; }
+  
+  // 1. Verificación por Regex instantánea
+  if (!emailRegex.test(emailActual)) { estadoCorreo.value = 'invalid'; return; }
+
+  // 2. Verificación AJAX (Debounce de 500ms)
+  estadoCorreo.value = 'checking'
+  clearTimeout(timeoutValidacion)
+  
+  timeoutValidacion = setTimeout(async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } })
+      
+      if (res.ok) {
+        const usuarios = await res.json()
+        const existe = usuarios.some(u => (u.email || '').toLowerCase() === emailActual)
+        estadoCorreo.value = existe ? 'taken' : 'available'
+      }
+    } catch (e) {
+      console.error('Error AJAX:', e)
+      estadoCorreo.value = 'idle'
+    }
+  }, 500)
+}
+
+const mensajeCorreo = computed(() => {
+  const msgs = {
+    invalid: '⚠ Formato de correo no válido',
+    checking: '⏳ Verificando disponibilidad...',
+    available: '✔ Correo disponible',
+    taken: '✖ Este correo ya está registrado en el sistema'
+  }
+  return msgs[estadoCorreo.value] || ''
+})
+
+const claseColorCorreo = computed(() => {
+  const classes = {
+    invalid: 'msg-taken',
+    checking: 'msg-checking',
+    available: 'msg-available',
+    taken: 'msg-taken'
+  }
+  return classes[estadoCorreo.value] || ''
+})
+
+const crearUsuario = async () => {
+  if (estadoCorreo.value !== 'available') return;
+
+  const nombreCompleto = `${form.value.nombres.trim()} ${form.value.apellidos.trim()}`;
+  const passParaBackend = form.value.password.trim(); 
   const token = localStorage.getItem('token');
   
   try {
     const res = await fetch('/api/usuarios', {
       method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`, 
-        'Content-Type': 'application/json' 
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         full_name: nombreCompleto,
         email: form.value.email.trim().toLowerCase(),
@@ -136,5 +198,20 @@ const crearUsuario = async () => {
   }
 };
 
-const handleLogout = () => { localStorage.clear(); router.push('/') }
+const handleLogout = async () => {
+  const token = localStorage.getItem('token')
+  if (token) { await fetch('/api/logout', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }).catch(() => {}) }
+  localStorage.clear()
+  router.push('/')
+}
 </script>
+
+<style scoped>
+.transition-colors { transition: color 0.3s ease; font-size: 0.85rem; }
+.msg-checking { color: #6c757d; }
+.msg-available { color: #198754; }
+.msg-taken { color: #dc3545; }
+[data-theme="dark"] .msg-checking { color: #adb5bd; }
+[data-theme="dark"] .msg-available { color: #81c784; }
+[data-theme="dark"] .msg-taken { color: #e57373; }
+</style>

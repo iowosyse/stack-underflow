@@ -65,3 +65,22 @@ pub async fn login_handler(
         None => Err((StatusCode::UNAUTHORIZED, "Credenciales incorrectas".to_string())),
     }
 }
+pub async fn logout_handler(
+    State(state): State<AppState>,
+    usuario: crate::middleware::UsuarioLogueado,
+) -> Result<Json<LoginResponse>, (StatusCode, String)> {
+
+    sqlx::query!(
+        "UPDATE usuarios SET token = NULL WHERE id = $1",
+        usuario.id
+    )
+    .execute(&state.pool_auth)
+    .await
+    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    Ok(Json(LoginResponse {
+        token: String::new(),
+        rol: String::new(),
+        nombre: String::new(),
+    }))
+}
