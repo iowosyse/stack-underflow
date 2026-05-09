@@ -16,14 +16,14 @@
 
       <form @submit.prevent="handleLogin" class="text-start">
         <div class="mb-3">
-          <label class="form-label">Usuario</label>
-          <input type="text" class="form-control" v-model="username"
-                 placeholder="primer nombre, sin acentos">
+          <label class="form-label">Correo Electrónico</label>
+          <input type="email" class="form-control" v-model="email"
+                placeholder="usuario@morelia.tecnm.mx">
         </div>
         <div class="mb-4">
           <label class="form-label">Contraseña</label>
           <input type="password" class="form-control" v-model="password"
-                 placeholder="apellidos, sin acentos">
+                 placeholder="contarseña">
         </div>
         <button type="submit" class="btn btn-dark w-100 py-2 rounded-pill mb-3" :disabled="cargando">
           {{ cargando ? 'Verificando...' : 'Ingresar al Sistema' }}
@@ -43,7 +43,7 @@ import { useRouter } from 'vue-router'
 import { useTheme } from '../composables/useTheme'
 
 const router   = useRouter()
-const username = ref('')
+const email    = ref('') // Ahora usamos una variable de email directa
 const password = ref('')
 const cargando = ref(false)
 const { isDark, toggle, init } = useTheme()
@@ -51,58 +51,43 @@ const { isDark, toggle, init } = useTheme()
 onMounted(() => init())
 
 const handleLogin = async () => {
-  if (!username.value || !password.value) {
-    alert('Por favor ingresa usuario y contraseña.')
+  if (!email.value || !password.value) {
+    alert('Por favor ingresa tu correo y contraseña.')
     return
   }
 
   cargando.value = true
 
   try {
-    const userLimpio = username.value.trim().toLowerCase()
-    const passLimpia = password.value.trim().toLowerCase().replace(/\s/g, '')
-    const emailBackend = `${userLimpio}.${passLimpia}@tecnm.mx`
-
-    const passOriginal     = password.value.trim()
-    const passParaBackend  = passOriginal.charAt(0).toUpperCase() + passOriginal.slice(1).toLowerCase()
-
     const respuesta = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: emailBackend,
-        password: passParaBackend
+        // Enviamos el correo tal cual lo escribió el usuario
+        email: email.value.trim().toLowerCase(),
+        password: password.value.trim()
       })
     })
 
     if (respuesta.ok) {
       const datos = await respuesta.json()
-
       localStorage.setItem('token', datos.token)
       localStorage.setItem('rol', datos.rol)
       localStorage.setItem('usuario_id', datos.id)
       if (datos.nombre) localStorage.setItem('usuario_nombre', datos.nombre)
 
-      // Se corrigió el ruteo para que coincida exactamente con los roles del Backend
-      if (datos.rol === 'administrador') {
-        router.push('/ejecutivo')
-      } else if (datos.rol === 'soporte') {
-        router.push('/soporte')
-      } else if (datos.rol === 'cliente') {
-        router.push('/user')
-      } else {
-        alert(`Rol desconocido recibido del servidor: "${datos.rol}".`)
-        router.push('/')
-      }
+      // Redirección por roles
+      if (datos.rol === 'administrador') router.push('/ejecutivo')
+      else if (datos.rol === 'soporte') router.push('/soporte')
+      else if (datos.rol === 'cliente') router.push('/user')
 
     } else if (respuesta.status === 401) {
-      alert('Credenciales incorrectas. Revisa tu usuario y contraseña.')
+      alert('Correo o contraseña incorrectos.')
     } else {
-      alert('Error interno en la base de datos.')
+      alert('Error al conectar con el servidor.')
     }
   } catch (error) {
     console.error('Fallo de red:', error)
-    alert('No se pudo establecer conexión con el servidor.')
   } finally {
     cargando.value = false
   }

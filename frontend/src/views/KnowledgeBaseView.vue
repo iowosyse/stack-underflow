@@ -24,12 +24,12 @@
 
         <div class="sidebar-footer">
           <div class="user-profile-card mb-3">
-            <div class="user-avatar" :style="{ background: avatarColor(store.currentUser?.fullName || '') }">
-              {{ initials(store.currentUser?.fullName || '?') }}
+            <div class="user-avatar" :style="{ background: avatarColor(nombreUsuario) }">
+              {{ iniciales(nombreUsuario) }}
             </div>
             <div class="min-w-0 flex-grow-1">
-              <div class="user-profile-name text-capitalize">
-                {{ store.currentUser?.fullName || 'Usuario' }}
+              <div class="user-profile-name text-capitalize profile-text-fix">
+                {{ nombreUsuario }}
               </div>
               <div class="user-profile-meta">Base de Conocimiento</div>
             </div>
@@ -147,27 +147,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { store } from '../store'
 import { useTheme } from '../composables/useTheme'
 
 const router  = useRouter()
 const openTab = ref(null)
 const { isDark, toggle, init } = useTheme()
 
+const nombreUsuario = computed(() => localStorage.getItem('usuario_nombre') || 'Usuario')
+
 onMounted(() => init())
 
-const handleLogout = () => { 
-  localStorage.clear();
-  store.logout(); 
+const toggle_acc = (id) => { openTab.value = openTab.value === id ? null : id }
+
+const logout = () => { 
+  localStorage.clear(); 
   router.push('/'); 
 }
 
-const toggle_acc = (id) => { openTab.value = openTab.value === id ? null : id }
-const logout     = ()   => { store.logout(); router.push('/') }
-
-const PALETTE = ['#2d6a4f','#1b4332','#40916c','#184e77','#1e6091','#6b3fa0','#553285','#8b2fc9','#7b2d8b','#9c4221']
-const initials    = (n) => n.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('')
-const avatarColor = (n) => { let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) & 0xffff; return PALETTE[h % PALETTE.length] }
+const iniciales = (n) => n.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('')
+const avatarColor = (n) => { 
+  const pLight = ['#4db6ac','#7986cb','#9575cd','#e57373','#f06292','#64b5f6','#4dd0e1','#81c784','#dce775','#ffb74d']
+  const pDark  = ['#00695c','#283593','#4527a0','#c62828','#ad1457','#1565c0','#00838f','#2e7d32','#9e9d24','#ef6c00']
+  const palette = isDark.value ? pDark : pLight
+  let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) & 0xffff; return palette[h % palette.length] 
+}
 </script>
+
+<style scoped>
+.profile-text-fix { color: inherit; }
+[data-theme="dark"] .profile-text-fix { color: #f8f9fa; }
+</style>

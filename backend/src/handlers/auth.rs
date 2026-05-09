@@ -36,10 +36,10 @@ pub async fn login_handler(
         r#"
         SELECT id, nombre, rol::text as "rol!" 
         FROM usuarios 
-        WHERE email = $1 AND password_hash = $2
+        WHERE email = $1 AND password_hash = $2 AND activo = TRUE
         "#,
         payload.email,
-        password_hasheada //
+        password_hasheada 
     )
     .fetch_optional(&state.pool_auth)
     .await

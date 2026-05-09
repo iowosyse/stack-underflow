@@ -161,7 +161,9 @@
         <section v-if="currentTab === 'usuarios'" class="d-flex flex-column h-100">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h4 fw-bold mb-0">Gestión de Usuarios</h2>
-            <button @click="abrirFormularioCrear" class="btn btn-info fw-bold">+ Nuevo Usuario</button>
+            <button @click="router.push('/soporte/nuevo-usuario')" class="btn btn-info fw-bold">
+              + Nuevo Usuario
+            </button>
           </div>
 
           <div v-if="mostrarFormulario" class="panel-inner p-4 mb-4">
@@ -386,10 +388,10 @@ const ticketsAbiertosDe = (n) => ticketsActivos.value.filter(t => t.author === n
 const ticketsCerradosDe = (n) => ticketsCerrados.value.filter(t => t.author === n).length
 
 // ── CRUD Acciones (Endpoints Pendientes) ───────────────────────────────────
+
+// ── CRUD Acciones ──────────────────────────────────────────────────────────
 const abrirFormularioCrear = () => {
-  modoEdicion.value = false; usuarioEnEdicion.value = null
-  formNombre.value = ''; formEmail.value = ''; formRol.value = 'cliente'
-  mostrarFormulario.value = true
+  router.push('/soporte/nuevo-usuario') 
 }
 
 const abrirFormularioEditar = (u) => {
@@ -402,12 +404,38 @@ const cancelarFormulario = () => { mostrarFormulario.value = false; usuarioEnEdi
 
 const guardarUsuario = async () => {
   if (!formNombre.value.trim()) return
-  if (modoEdicion.value) {
-    // TODO: PUT /api/usuarios/:id
-    console.log("Actualizar usuario", usuarioEnEdicion.value.id, formNombre.value)
-  } else {
-    // TODO: POST /api/usuarios
-    console.log("Crear usuario", formNombre.value, formRol.value)
+  const token = localStorage.getItem('token')
+  
+  try {
+    if (modoEdicion.value) {
+      // PUT: Editar usuario existente
+      const res = await fetch(`/api/usuarios/${usuarioEnEdicion.value.id}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: formNombre.value, email: formEmail.value, role: formRol.value })
+      })
+      if (res.ok) await cargarUsuarios()
+    } else {
+      // POST: Crear nuevo usuario
+      let emailFinal = formEmail.value
+      let pwdFinal = "12345"
+      
+      // Si el ejecutivo no llenó el correo, lo generamos en automático
+      if (!emailFinal) {
+        const partes = formNombre.value.trim().split(' ')
+        emailFinal = `${partes[0].toLowerCase()}.${(partes.slice(1).join('').toLowerCase() || '12345')}@tecnm.mx`
+        pwdFinal = partes.slice(1).join(' ') || '12345'
+      }
+
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: formNombre.value, email: emailFinal, role: formRol.value, password: pwdFinal })
+      })
+      if (res.ok) await cargarUsuarios()
+    }
+  } catch (e) {
+    console.error("Error al guardar usuario:", e)
   }
   cancelarFormulario()
 }
@@ -416,19 +444,50 @@ const pedirConfirmacionEliminar = (u) => { usuarioAEliminar.value = u }
 
 const confirmarEliminar = async () => {
   if (!usuarioAEliminar.value) return
-  // TODO: DELETE /api/usuarios/:id
-  console.log("Eliminar usuario", usuarioAEliminar.value.id)
+  const token = localStorage.getItem('token')
+  
+  try {
+    const res = await fetch(`/api/usuarios/${usuarioAEliminar.value.id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    if (res.ok) await cargarUsuarios()
+  } catch (e) {
+    console.error("Error al eliminar usuario:", e)
+  }
   usuarioAEliminar.value = null
 }
 
 const ticketFormValido = computed(() => ticketAsunto.value.trim() !== '' && ticketDescripcion.value.trim() !== '')
 
 const enviarTicket = async () => {
-  // TODO: POST /api/tickets
-  console.log("Nuevo ticket de Admin:", ticketAsunto.value)
-  ticketAsunto.value = ''; ticketDescripcion.value = ''
-  ticketExitoso.value = true
-  setTimeout(() => (ticketExitoso.value = false), 3500)
+  const token = localStorage.getItem('token')
+  
+  // Transformamos el valor visual ("Hardware") al formato ENUM ("hardware")
+  const categoriaNormalizada = ticketCategoria.value.toLowerCase()
+
+  try {
+    const res = await fetch('/api/tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({
+        asunto: ticketAsunto.value,
+        categoria: categoriaNormalizada,
+        descripcion: ticketDescripcion.value
+      })
+    })
+
+    if (res.ok) {
+      ticketAsunto.value = ''; ticketDescripcion.value = ''
+      ticketExitoso.value = true
+      await cargarTickets() // Refresca la tabla en vivo
+      setTimeout(() => (ticketExitoso.value = false), 3500)
+    } else {
+      alert("Error al levantar el ticket. Revisa la consola.")
+    }
+  } catch (e) {
+    console.error("Error de conexión:", e)
+  }
 }
 
 const handleLogout = () => { localStorage.clear(); router.push('/') }
