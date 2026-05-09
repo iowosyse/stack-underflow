@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, nombre, rol::text as \"rol!\" \n        FROM usuarios \n        WHERE email = $1 AND password_hash = $2\n        ",
+  "query": "\n        SELECT id, nombre, rol::text as \"rol!\" \n        FROM usuarios \n        WHERE email = $1 AND password_hash = $2 AND activo = TRUE\n        ",
   "describe": {
     "columns": [
       {
@@ -31,5 +31,5 @@
       null
     ]
   },
-  "hash": "f98f6c00d8295f74b64ee26c8b1f720241c61658a1f8b89b1099473bf4e4989c"
+  "hash": "5e347fefe1ef86327ddbe3e8bac9388fa8fa5872b3cab7acea7746859ad705c3"
 }

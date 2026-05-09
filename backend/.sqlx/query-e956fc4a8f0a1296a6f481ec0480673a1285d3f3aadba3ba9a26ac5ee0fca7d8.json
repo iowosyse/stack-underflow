@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, nombre as \"full_name!\", rol::text as \"role!\", email \n        FROM usuarios \n        ORDER BY nombre ASC\n        ",
+  "query": "\n        SELECT id, nombre as \"full_name!\", rol::text as \"role!\", email \n        FROM usuarios \n        WHERE activo = TRUE\n        ORDER BY nombre ASC\n        ",
   "describe": {
     "columns": [
       {
@@ -34,5 +34,5 @@
       false
     ]
   },
-  "hash": "7213fee0c137c4bb4859b7d6bb68363f5ed6d590c52d29b4921eeb520fedecea"
+  "hash": "e956fc4a8f0a1296a6f481ec0480673a1285d3f3aadba3ba9a26ac5ee0fca7d8"
 }
