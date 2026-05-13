@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE usuarios SET nombre = $1, email = $2, rol = $3::text::rol_usuario\n        WHERE id = $4 AND activo = TRUE AND empresa_id = $5\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8c9c2288168acdbd23831fdd8de8b2de06a9825cb0c1973ef1815bc8acb99cdb"
+}

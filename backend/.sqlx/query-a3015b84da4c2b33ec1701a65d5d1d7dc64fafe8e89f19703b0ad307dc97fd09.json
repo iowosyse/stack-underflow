@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, nombre, rol::text as \"rol!\" \n            FROM usuarios \n            WHERE token = $1\n            ",
+  "query": "\n            SELECT id, nombre, rol::text as \"rol!\", empresa_id\n            FROM usuarios\n            WHERE token = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -17,6 +17,11 @@
         "ordinal": 2,
         "name": "rol!",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "empresa_id",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
@@ -27,8 +32,9 @@
     "nullable": [
       false,
       false,
-      null
+      null,
+      false
     ]
   },
-  "hash": "ff571c9cbe89e5ef5161298a9a4d9bb704a7d1377bce7c7d2774c91557c566d0"
+  "hash": "a3015b84da4c2b33ec1701a65d5d1d7dc64fafe8e89f19703b0ad307dc97fd09"
 }

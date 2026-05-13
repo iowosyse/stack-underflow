@@ -28,8 +28,11 @@
         <button type="submit" class="btn btn-dark w-100 py-2 rounded-pill mb-3" :disabled="cargando">
           {{ cargando ? 'Verificando...' : 'Ingresar al Sistema' }}
         </button>
-        <RouterLink to="/forgot-password" class="btn btn-outline-dark w-100 py-2 rounded-pill">
+        <RouterLink to="/forgot-password" class="btn btn-outline-dark w-100 py-2 rounded-pill mb-2">
           Olvidé mi Contraseña
+        </RouterLink>
+        <RouterLink to="/registro" class="btn btn-outline-dark w-100 py-2 rounded-pill">
+          Registrar empresa
         </RouterLink>
       </form>
 

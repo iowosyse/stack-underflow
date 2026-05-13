@@ -18,12 +18,6 @@ pub struct RespuestaTicket {
     pub mensaje: String,
 }
 
-// Los campos usan los nombres que espera el frontend (camelCase vía serde).
-// El estado se devuelve mapeado a los valores que entiende la UI:
-//   abierto      → "disponible"
-//   en_progreso  → "asignado"
-//   resuelto     → "hecho"
-//   cerrado      → "hecho"
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TicketRespuesta {
@@ -32,8 +26,8 @@ pub struct TicketRespuesta {
     pub subject: String,
     pub category: String,
     pub priority: String,
-    pub status: String,              // valor ya mapeado para el frontend
-    pub assigned_to: Option<String>, // nombre del agente, o null
+    pub status: String,
+    pub assigned_to: Option<String>,
     pub description: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
@@ -46,20 +40,18 @@ pub async fn crear_ticket(
     Json(payload): Json<NuevoTicket>,
 ) -> Result<Json<RespuestaTicket>, (StatusCode, String)> {
 
-    // FIX: el frontend envía "Hardware" / "Software" / "Redes" (capitalizadas)
-    // pero el ENUM categoria_ticket almacena en minúscula.
-    // Normalizamos antes del cast para que no falle el INSERT.
     let categoria_lower = payload.categoria.to_lowercase();
 
     sqlx::query!(
         r#"
-        INSERT INTO tickets (autor_id, asunto, categoria, descripcion)
-        VALUES ($1, $2, $3::text::categoria_ticket, $4)
+        INSERT INTO tickets (autor_id, asunto, categoria, descripcion, empresa_id)
+        VALUES ($1, $2, $3::text::categoria_ticket, $4, $5)
         "#,
         usuario.id,
         payload.asunto,
         categoria_lower,
-        payload.descripcion
+        payload.descripcion,
+        usuario.empresa_id
     )
     .execute(&state.pool_creador)
     .await
@@ -74,10 +66,6 @@ pub async fn crear_ticket(
 }
 
 // ── GET /api/tickets ──────────────────────────────────────────────────────────
-// Tickets NO cerrados: estado IN ('abierto', 'en_progreso')
-// Visibilidad:
-//   administrador / agente → todos
-//   cliente                → solo los suyos
 
 pub async fn obtener_tickets_activos(
     State(state): State<AppState>,
@@ -108,6 +96,7 @@ pub async fn obtener_tickets_activos(
                 LEFT JOIN usuarios u_asig  ON u_asig.id  = t.asignado_a_id
                 WHERE t.estado IN ('abierto', 'en_progreso')
                   AND t.activo = TRUE
+                  AND t.empresa_id = $1
                 ORDER BY
                     CASE t.prioridad
                         WHEN 'urgente'  THEN 1
@@ -116,7 +105,8 @@ pub async fn obtener_tickets_activos(
                         WHEN 'baja'     THEN 4
                     END,
                     t.creado_en ASC
-                "#
+                "#,
+                usuario_auth.empresa_id
             )
             .fetch_all(&state.pool_lector)
             .await
@@ -146,29 +136,24 @@ pub async fn obtener_tickets_activos(
                 WHERE t.autor_id = $1
                   AND t.estado IN ('abierto', 'en_progreso')
                   AND t.activo = TRUE
+                  AND t.empresa_id = $2
                 ORDER BY t.creado_en DESC
                 "#,
-                usuario_auth.id
+                usuario_auth.id,
+                usuario_auth.empresa_id
             )
             .fetch_all(&state.pool_lector)
             .await
         }
     };
 
-    tickets
-        .map(Json)
-        .map_err(|e| {
+    tickets.map(Json).map_err(|e| {
         eprintln!("Error tickets: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
     })
 }
 
 // ── GET /api/tickets/cerrados ─────────────────────────────────────────────────
-// Tickets finalizados: estado IN ('resuelto', 'cerrado')
-// Visibilidad:
-//   administrador → todos
-//   agente        → solo los que él gestionó (asignado_a_id = su id)
-//   cliente       → solo los suyos
 
 pub async fn obtener_tickets_cerrados(
     State(state): State<AppState>,
@@ -196,8 +181,10 @@ pub async fn obtener_tickets_cerrados(
                 LEFT JOIN usuarios u_asig  ON u_asig.id  = t.asignado_a_id
                 WHERE t.estado IN ('resuelto', 'cerrado')
                   AND t.activo = TRUE
+                  AND t.empresa_id = $1
                 ORDER BY t.creado_en DESC
-                "#
+                "#,
+                usuario_auth.empresa_id
             )
             .fetch_all(&state.pool_lector)
             .await
@@ -223,9 +210,11 @@ pub async fn obtener_tickets_cerrados(
                 WHERE t.estado IN ('resuelto', 'cerrado')
                   AND t.asignado_a_id = $1
                   AND t.activo = TRUE
+                  AND t.empresa_id = $2
                 ORDER BY t.creado_en DESC
                 "#,
-                usuario_auth.id
+                usuario_auth.id,
+                usuario_auth.empresa_id
             )
             .fetch_all(&state.pool_lector)
             .await
@@ -251,36 +240,35 @@ pub async fn obtener_tickets_cerrados(
                 WHERE t.estado IN ('resuelto', 'cerrado')
                   AND t.autor_id = $1
                   AND t.activo = TRUE
+                  AND t.empresa_id = $2
                 ORDER BY t.creado_en DESC
                 "#,
-                usuario_auth.id
+                usuario_auth.id,
+                usuario_auth.empresa_id
             )
             .fetch_all(&state.pool_lector)
             .await
         }
     };
 
-    tickets
-        .map(Json)
-        .map_err(|e| {
+    tickets.map(Json).map_err(|e| {
         eprintln!("Error tickets: {}", e);
         (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
     })
 }
 
 // ── PUT /api/tickets/:id/asignar ─────────────────────────────────────────────
-// El agente autenticado toma el ticket: estado → en_progreso, asignado_a_id = su id.
-// Solo funciona si el ticket está en estado 'abierto' (disponible).
+
 pub async fn tomar_ticket(
     State(state): State<AppState>,
     usuario_auth: UsuarioLogueado,
     Path(id): Path<i32>,
 ) -> Result<Json<RespuestaTicket>, (StatusCode, String)> {
- 
+
     if usuario_auth.rol != "soporte" && usuario_auth.rol != "administrador" {
         return Err((StatusCode::FORBIDDEN, "Sin permiso".to_string()));
     }
- 
+
     let resultado = sqlx::query!(
         r#"
         UPDATE tickets
@@ -289,9 +277,11 @@ pub async fn tomar_ticket(
         WHERE id = $2
           AND estado = 'abierto'
           AND activo = TRUE
+          AND empresa_id = $3
         "#,
         usuario_auth.id,
-        id
+        id,
+        usuario_auth.empresa_id
     )
     .execute(&state.pool_borrador)
     .await
@@ -299,27 +289,26 @@ pub async fn tomar_ticket(
         eprintln!("Error al tomar ticket {}: {}", id, e);
         (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
     })?;
- 
+
     if resultado.rows_affected() == 0 {
         return Err((StatusCode::CONFLICT, "El ticket no existe, ya fue tomado o no está disponible".to_string()));
     }
- 
+
     Ok(Json(RespuestaTicket { mensaje: "Ticket asignado correctamente".to_string() }))
 }
- 
+
 // ── PUT /api/tickets/:id/cerrar ───────────────────────────────────────────────
-// El agente marca su ticket como resuelto: estado → resuelto.
-// Solo puede cerrar tickets que él mismo tiene asignados.
+
 pub async fn cerrar_ticket(
     State(state): State<AppState>,
     usuario_auth: UsuarioLogueado,
     Path(id): Path<i32>,
 ) -> Result<Json<RespuestaTicket>, (StatusCode, String)> {
- 
+
     if usuario_auth.rol != "soporte" && usuario_auth.rol != "administrador" {
         return Err((StatusCode::FORBIDDEN, "Sin permiso".to_string()));
     }
- 
+
     let resultado = sqlx::query!(
         r#"
         UPDATE tickets
@@ -328,9 +317,11 @@ pub async fn cerrar_ticket(
           AND asignado_a_id = $2
           AND estado = 'en_progreso'
           AND activo = TRUE
+          AND empresa_id = $3
         "#,
         id,
-        usuario_auth.id
+        usuario_auth.id,
+        usuario_auth.empresa_id
     )
     .execute(&state.pool_borrador)
     .await
@@ -338,10 +329,10 @@ pub async fn cerrar_ticket(
         eprintln!("Error al cerrar ticket {}: {}", id, e);
         (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
     })?;
- 
+
     if resultado.rows_affected() == 0 {
         return Err((StatusCode::CONFLICT, "El ticket no existe, no está asignado a ti o ya fue resuelto".to_string()));
     }
- 
+
     Ok(Json(RespuestaTicket { mensaje: "Ticket marcado como resuelto".to_string() }))
 }

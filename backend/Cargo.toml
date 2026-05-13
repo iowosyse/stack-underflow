@@ -16,3 +16,4 @@ tokio = { version = "1.52.2", features = ["full"] }
 tokio-stream = "0.1.18"
 tower-http = { version = "0.6.9", features = ["cors"] }
 uuid = { version = "1.23.1", features = ["v4"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }

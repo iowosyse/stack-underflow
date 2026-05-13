@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO tickets (autor_id, asunto, categoria, descripcion, empresa_id)\n        VALUES ($1, $2, $3::text::categoria_ticket, $4, $5)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "60a66e51e1141caa773b02f9330479d1470ecd4851fd39c8edd7381b7fdd08c2"
+}

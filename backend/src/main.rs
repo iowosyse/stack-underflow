@@ -94,7 +94,9 @@ async fn main() {
         .route("/api/tickets/cerrados", get(handlers::tickets::obtener_tickets_cerrados))
         .route("/api/tickets/{id}/asignar", put(handlers::tickets::tomar_ticket))
         .route("/api/tickets/{id}/cerrar", put(handlers::tickets::cerrar_ticket))
-        
+
+        .route("/api/empresas/registro", post(handlers::empresas::registrar_empresa))
+
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

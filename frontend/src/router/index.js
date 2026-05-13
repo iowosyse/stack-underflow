@@ -8,6 +8,7 @@ import KnowledgeBaseView from '../views/KnowledgeBaseView.vue'
 import SoporteView from '../views/SoporteView.vue'
 import EjecutivoView from '../views/EjecutivoView.vue'
 import NuevoUsuarioView from '../views/NuevoUsuarioView.vue'
+import RegistroView from '../views/RegistroView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,10 +18,15 @@ const router = createRouter({
       name: 'login', 
       component: LoginView 
     },
-    { 
-      path: '/forgot-password', 
-      name: 'forgot-password', 
-      component: ForgotPasswordView 
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView
+    },
+    {
+      path: '/registro',
+      name: 'registro',
+      component: RegistroView
     },
     { 
       path: '/user', 
@@ -65,8 +71,8 @@ router.beforeEach((to, from) => {
     return '/'
   }
 
-  // Regla 2: Si ya inició sesión e intenta ir al Login, lo regresamos a su panel
-  if (to.path === '/' && token) {
+  // Regla 2: Si ya inició sesión e intenta ir al Login o Registro, lo regresamos a su panel
+  if ((to.path === '/' || to.path === '/registro') && token) {
     if (rolUsuario === 'administrador') return '/ejecutivo'
     if (rolUsuario === 'soporte') return '/soporte'
     if (rolUsuario === 'cliente') return '/user'

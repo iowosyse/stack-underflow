@@ -10,11 +10,12 @@ pub struct UsuarioLogueado {
     pub id: i32,
     pub nombre: String,
     pub rol: String,
+    pub empresa_id: i32,
 }
 
 impl<S> FromRequestParts<S> for UsuarioLogueado
 where
-    PgPool: axum::extract::FromRef<S>, // Necesita acceso a Neon
+    PgPool: axum::extract::FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = (StatusCode, &'static str);
@@ -25,7 +26,7 @@ where
             .get(AUTHORIZATION)
             .and_then(|value| value.to_str().ok())
             .filter(|value| value.starts_with("Bearer "))
-            .map(|value| &value[7..]); // Le mochamos la palabra "Bearer "
+            .map(|value| &value[7..]);
 
         let token = match auth_header {
             Some(t) => t,
@@ -34,12 +35,11 @@ where
 
         let pool = PgPool::from_ref(state);
 
-        // Verificar si ese token existe y de quién es
         let usuario = sqlx::query_as!(
             UsuarioLogueado,
             r#"
-            SELECT id, nombre, rol::text as "rol!" 
-            FROM usuarios 
+            SELECT id, nombre, rol::text as "rol!", empresa_id
+            FROM usuarios
             WHERE token = $1
             "#,
             token
@@ -48,7 +48,6 @@ where
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error conectando a la BD"))?;
 
-        // Si existe, lo dejamos pasar. Si no, lo pateamos (401).
         match usuario {
             Some(u) => Ok(u),
             None => Err((StatusCode::UNAUTHORIZED, "Token inválido o sesión expirada")),

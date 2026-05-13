@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    t.id,\n                    u_autor.nombre      AS \"author!\",\n                    t.asunto            AS \"subject!\",\n                    t.categoria::text   AS \"category!\",\n                    t.prioridad::text   AS \"priority!\",\n                    'hecho'             AS \"status!\",\n                    u_asig.nombre       AS \"assigned_to\",\n                    t.descripcion       AS \"description!\",\n                    t.creado_en         AS \"created_at!\"\n                FROM tickets t\n                JOIN  usuarios u_autor ON u_autor.id = t.autor_id\n                LEFT JOIN usuarios u_asig  ON u_asig.id  = t.asignado_a_id\n                WHERE t.estado IN ('resuelto', 'cerrado')\n                  AND t.autor_id = $1\n                  AND t.activo = TRUE\n                ORDER BY t.creado_en DESC\n                ",
+  "query": "\n                SELECT\n                    t.id,\n                    u_autor.nombre      AS \"author!\",\n                    t.asunto            AS \"subject!\",\n                    t.categoria::text   AS \"category!\",\n                    t.prioridad::text   AS \"priority!\",\n                    'hecho'             AS \"status!\",\n                    u_asig.nombre       AS \"assigned_to\",\n                    t.descripcion       AS \"description!\",\n                    t.creado_en         AS \"created_at!\"\n                FROM tickets t\n                JOIN  usuarios u_autor ON u_autor.id = t.autor_id\n                LEFT JOIN usuarios u_asig  ON u_asig.id  = t.asignado_a_id\n                WHERE t.estado IN ('resuelto', 'cerrado')\n                  AND t.autor_id = $1\n                  AND t.activo = TRUE\n                  AND t.empresa_id = $2\n                ORDER BY t.creado_en DESC\n                ",
   "describe": {
     "columns": [
       {
@@ -51,6 +51,7 @@
     ],
     "parameters": {
       "Left": [
+        "Int4",
         "Int4"
       ]
     },
@@ -66,5 +67,5 @@
       true
     ]
   },
-  "hash": "b421089ec15e0755b2651ca63aaa0da42d3cdbbcebd60937c61603f919ac70c1"
+  "hash": "8f1836e48826587ec4ee7a987ec58857b74fcf2dcf029f1c0b4a07322e117baf"
 }
